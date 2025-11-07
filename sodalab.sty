@@ -1,0 +1,245 @@
+%------------------------------------------------
+% Please do not modify this file!!!
+% If you need to add new packages, do it in the main.tex file
+%------------------------------------------------
+\usepackage[letterpaper, left=1in, top=1in, right=1in, bottom=1in]{geometry}
+
+% ---- Common packages
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\graphicspath{{Figures/}}
+\usepackage{amsthm,bm}
+\usepackage{pbox}
+\usepackage{mathrsfs}
+\usepackage{enumitem}
+\usepackage{subfigure}
+
+\usepackage{mathtools, cuted}
+\usepackage{bbm}
+\usepackage{dsfont}
+
+\usepackage{accents}
+\DeclareRobustCommand{\ubar}[1]{\underaccent{\bar}{#1}}
+%\usepackage{flushend}
+\usepackage{makecell}
+\usepackage{array}
+%\multicolumn{number cols}{align}{text} % align: l,c,r
+%multi-row
+\usepackage{multirow}
+\usepackage{diagbox, xcolor}
+\usepackage{arcs}
+\usepackage{tipa}
+\usepackage{natbib}
+
+\usepackage{xspace}
+
+% Note: hyperref is loaded by pdfx package in main.tex
+% hyperref options can be set in main.tex after loading sodalab.sty
+
+% ---- Theorem and others
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{remark}{Remark}
+\newtheorem{claim}{Claim}
+\newtheorem{example}{Example}
+\newtheorem{definition}{Definition}
+\newtheorem{assumption}{Assumption}
+\newtheorem{proposition}{Proposition}
+
+% ---- Tikz
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.misc}
+
+% ---- Tables
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{tablefootnote} 
+\usepackage{boldline}
+
+% ---- Wrapper text and environment with background 
+\usepackage[many]{tcolorbox}
+\newenvironment{wrapperText}[1]
+{
+%	\smallskip
+	\begin{tcolorbox}[breakable, enhanced, colback=gray!20, boxrule=0pt, arc=5pt, left=0.5em, right=0.5em, top=0.5em, bottom=0.5em, 
+        before upper=\setlength{\parskip}{1em}
+        ]
+        #1}
+        {\end{tcolorbox}
+%	\smallskip
+}
+
+\tcolorboxenvironment{theorem}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{proposition}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{corollary}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{lemma}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{assumption}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  %oversize=2pt,
+  %sharp corners,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{remark}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{definition}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  %oversize=2pt,
+  %sharp corners,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+\tcolorboxenvironment{example}{
+  breakable,
+  colback=gray!20,
+  boxrule=0pt,
+  boxsep=1pt,
+  left=0.5em,right=0.5em,top=0.5em,bottom=0.5em,
+  %oversize=2pt,
+  %sharp corners,
+  arc=5pt,
+  before skip=\topsep,
+  after skip=\topsep,
+}
+
+% ---- change section title color
+\usepackage{sectsty}
+%\chapterfont{\color{blue}}  % sets colour of chapters
+%\partfont{\color{gray}}  % sets colour of parts
+%\sectionfont{\color{blue}}  % sets colour of sections
+\paragraphfont{\color{darkgray}}  % sets colour of sections
+
+% ---- make section title support \textsc
+\usepackage[T1]{fontenc}
+
+% ---- Color text box and tables
+\usepackage{color, xcolor, colortbl}
+%\usepackage[most]{tcolorbox}
+
+\colorlet{LightGray}{gray!60}
+\colorlet{LightRed}{red!10}
+\colorlet{LightPurple}{purple!20}
+\definecolor{LightCyan}{rgb}{0.88,1,1}
+
+\newcolumntype{g}{>{\columncolor{Gray}}c}
+
+% ---- Algorithm environments 
+\usepackage{algorithm, algorithmicx, algpseudocode}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill$\blacktriangleright$ #1}
+
+% ---- Appendix
+\usepackage[page]{appendix} % print appendices title
+\renewcommand{\appendixpagename}{Appendix}
+
+% ---- ToDo list
+\newlist{todolist}{itemize}{2}
+\setlist[todolist]{label=$\square$}
+\usepackage{pifont}
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
+\hspace{-2.5pt}}
+\newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
+
+
+% ---- Major todo-notes and minor side-notes with numbering
+% \usepackage{todonotes}
+
+% \newcounter{todotan}
+% \newcommand{\todotan}[1]{
+% \stepcounter{todotan}
+% \begin{tcolorbox}[colback=LightCyan, breakable, enhanced, before upper=\setlength{\parskip}{1em}]  
+% \noindent{\textcolor{red}{\textsf{\bfseries To-Do~[\arabic{todotan}]:} #1}}
+% \end{tcolorbox}
+% }
+
+% \newcounter{notetan}
+% \newcommand{\notetan}[2][]{
+% \stepcounter{notetan}
+% \todo[size=\scriptsize,color=red!20!white,#1]{\textbf{XT[\arabic{notetan}]}: #2}\xspace
+% }
+
+% ---- Annotate with user-defined colors
+%\usepackage{changes}
+%\definechangesauthor[name={Xiaoqi Tan}, color=orange]{XT}
+%\colorlet{Changes@Color}{red}
+
+
+% ---- Highlight text with colored background \hl{}
+% ---- Underline text allowing line breaking \ul{}
+% \usepackage{soul}
+% \sethlcolor{yellow}
+
+% ---- use Libertine font
+% \usepackage[utf8]{inputenc}
+% \usepackage[T1]{fontenc}
+% \usepackage[tt=false,type1=true]{libertine}
+% \usepackage[libertine]{newtxmath}
+% \usepackage[varqu]{zi4}

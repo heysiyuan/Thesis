@@ -1,0 +1,50 @@
+\section{Problem Statement}
+
+
+In contrast to the previous section, where we focused on enforcing a hard allocation constraint to achieve group fairness by quantity. We may consider the alternative where we provide incentives to satisfy group fairness by quantity instead by imposing a penalty function on the utility of each group, where the penalty gradually decreases to 0 as the number of allocations to the group approaches its desired allocation quantity $ m_j $ to discourage under allocation, and increases afterwards to discourage over allocation. We shall refer to this setting as the soft GFQ setting onwards.
+
+
+\begin{definition}[\textbf{Soft-GFQ}]
+    Consider a set of buyer groups $[K]$, where each group $j \in [K]$ is associated with a penalty function $f_j: \mathbb{R}_+ \to \mathbb{R}_+$. Each function $f_j$ is continuous on $[0, \infty)$, attains its minimum value of 0 at $m_j$, is non-increasing on $[0, m_j]$, and non-decreasing on $[m_j, \infty)$.
+\end{definition}
+
+
+Given an allocation $ \mathbf{x} \in \mathbb{R}_+^T $, the total value for group $ j $ is given by $ \mathcal{V}_j(\mathbf{x}) = \sum_{t \in [T]} v_t x_t \cdot  \boldsymbol{1}_{\{j_t = j\}} $, its utility is equal to its value for the allocation, subtracted by the penalty function, i.e., $ \mathcal{U}_j(\mathbf{x}) = \mathcal{V}_j(\mathbf{x}) - f_j(\sum_{t\in [T]} x_t \cdot \boldsymbol{1}_{\{j_t = j\}}) $.
+
+Our objective is then to maximize the overall social welfare $\mathcal{W}(\mathbf{x}) = \sum_{j\in [K]} \mathcal{U}_j(\mathbf{x}) $. For an arrival instance $ I $, the offline optimal performance $ \OPT(I) $ can obtained by solving the following optimization problem:
+
+\begin{subequations}\label{equation-soft-gfq-primal}
+    \begin{align}
+        \max_{x_t\in[0, r_t]} & \sum_{j\in [K]} \left\{\mathcal{V}_j(\mathbf{x}) - f_j\left(\sum_{t\in [T]} x_t \cdot \boldsymbol{1}_{\{j_t = j\}} \right)\right\} \\
+        \text{s.t.} \quad     & \sum_{t\in[T]} x_t \leq 1.
+    \end{align}
+\end{subequations}
+
+We begin with the same assumption that there are sufficient arrivals in each group to meet its requirement; otherwise, it would be unreasonable to impose a positive penalty for missing it.
+\begin{assumption}[\textbf{Soft-GFQ Satisfiability}] \label{assumption-soft-gfq-satisfiability}
+    For each group $ j\in [K] $, there are at least $ n_j $ arrivals where $ n_j = \arg\min_n \sum_{t\in[n]} r_t\cdot \boldsymbol{1}_{\{j_t = j\}} \geq m_j $ denotes the smallest integer that ensures the satisfiability of the GFQ requirement $ m_j $.
+\end{assumption}
+
+For a given set of desired allocations $ \{m_j\}_{j\in[K]} $, we denote the total desired allocations across all groups as $ M = \sum_{j\in [K]} m_j $. We assume that the capacity $ B $ is large enough to accommodate the total desired allocations across all groups.
+\begin{assumption}[\textbf{Soft-GFQ Capacity}] \label{assumption-soft-gfq-capacity}
+    The total desired allocations across all groups do not exceed the overall capacity $ 1 $, i.e., $ M = \sum_{j\in [K]} m_j \leq 1 $.
+\end{assumption}
+
+
+\begin{assumption}[\textbf{Soft-GFQ Bounded Values}]\label{assumption-soft-gfq-bounded-values}
+    Each agent's value $ v_t $ is bounded within the same interval $ [1, \theta] $, where $ \theta > 1 $ is a constant, regardless of their group identity $ j_t $.
+\end{assumption}
+
+
+\section{Zero-to-Linear Penalties}
+
+\input{body/ch4-01-Z2L.tex}
+
+\section{Linear-to-Zero Penalties}
+
+\input{body/ch4-02-L2Z.tex}
+
+
+\section{Linear-to-Linear Penalties}
+
+\input{body/ch4-03-L2L.tex}
