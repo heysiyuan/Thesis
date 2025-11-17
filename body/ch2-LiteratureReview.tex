@@ -1,5 +1,16 @@
+In this chapter, we review the existing literature related to online allocation problems, and examine how our work fits into the broader context of research in this area.
+
 \section{Online Allocation}
+
+We begin by surveying the general landscape of online allocation problems, highlighting key models and assumptions that have been extensively studied in the literature. Next, we consider the body of work that takes into account cost functions in the decision-making problem and their practice relevance. Lastly, we explore various notions of fairness measures, both at the individual and group levels, that have been proposed to ensure fair outcome of the allocation process.
+
 \subsection{Adversarial and Stochastic Settings in Online Allocation}
+
+The study of online allocation problems can be broadly categorized into adversarial and stochastic settings, each with its own applications and challenges.
+
+In adversarial settings, the input sequence is chosen by an adversary, making it essential for online algorithms to perform well against worst-case scenarios. Classic works in this area include the online knapsack problem \cite{chakrabarty2008online}, AdWords problems \cite{mehta2007adwords, mehta2013online}, and one-way trading problems \cite{el2001optimal}. The core challenge in these problems lies in making irrevocable decisions without knowledge of future inputs, requiring a careful balance between capturing immediate rewards and preserving resources for future opportunities based on worst-case considerations. This approach is particularly popular in the computer science community, where robustness against the unpredictable future is often prioritized, with applications in resource allocation in cloud-computing, online advertising, and network routing.
+
+In contrast, stochastic settings assume that the input sequence is drawn from a known or unknown probability distribution. This allows online algorithms to future leverage the statistical properties of the input in its decision-making. Notable works in this stream include the prophet inequality framework initiated by Krengel and Sucheston \cite{krengel1978semiamarts}, with close ties to the optimal stopping theory \cite{samuel1984comparison}, online matching with unknown distributions \cite{karande2011online}, and online stochastic knapsack problems \cite{jiang2022tight}. The goal in these problems is to design algorithms that maximize expected performance, often by learning and adapting to the underlying distribution over time. The stochastic approach is particularly relevant in operations research and economics, where decision-making under uncertainty is a central theme, with applications in inventory management, revenue management, and online marketplaces.
 
 \subsection{Online Allocation with Costs}
 
