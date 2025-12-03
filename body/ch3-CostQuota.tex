@@ -1,5 +1,80 @@
 \section{Problem Statement}
 
+We consider a seller with a total resource budget $B$ and a production cost function $f:[0,B]\to\mathbb{R}_{+}$. The seller offers the divisible resource to a sequence of buyers indexed by $t\in\{1,\dots,T\}$, with the total number of buyers $T$ unknown. Each buyer $t$ is characterized by a per-unit value $v_t$ and an allocation rate limit $r_t$, and arrives sequentially over time.
+
+When buyer $t$ arrives, the seller must irrevocably choose an allocation decision $x_t\in[0,r_t]$ without any information about future buyers. Let $\{x_t\}_{t=1}^T$ denote the resulting allocation, which must satisfy two key constraints.
+
+First, the total allocation cannot exceed the resource budget:
+\[
+    \sum_{t\in[T]} x_t \leq B.
+\]
+Second, there is an allocation quota $M$ that must be met:
+\[
+    \sum_{t\in[T]} x_t \geq M.
+\]
+
+Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the total value derived from the buyers minus the production cost incurred by the seller:
+\[
+    \sum_{t\in[T]} v_t x_t - f\left(\sum_{t\in[T]} x_t\right).
+\]
+
+\subsection{Problem Assumptions}
+
+We make the following assumptions regarding the problem setting:
+
+\begin{assumption}[Bounded Valuation]\label{assumption-bounded-value}
+    For each buyer $t \in [T]$, the per-unit value $v_t$ lies within a known bounded interval $[1, \theta]$, where $\theta \geq 1$ is a constant.
+\end{assumption}
+
+\begin{assumption}[Quota Feasibility]\label{assumption-quota-feasibility}
+    There exist at least $n$ arrivals, where
+    \[
+        n = \arg\min_{k} \left\{ \sum_{t=1}^{k} r_t \,\middle|\, \sum_{t=1}^{k} r_t \geq M \right\}
+    \]
+    denotes the smallest integer such that the quota requirement is feasible.
+\end{assumption}
+
+\begin{assumption}[Quota Profitability]\label{assumption-quota-profitability}
+    We assume $f'(M) \leq 1$ (or equivalently, for all $v \in [1, \theta]$, $B(v) \geq M$, or $\underline{B} \geq M$) to ensure that it is always profitable for the seller to satisfy the quota requirement.
+\end{assumption}
+
+\subsection{Problem Formulation}
+
+Formally, a problem setting can be defined by the following two components:
+
+\begin{itemize}
+    \item A \emph{setup} $S = \bigl(B,\,M,\,f,\,\theta\bigr)$ that includes information known a priori to the seller, where:
+          \begin{itemize}
+              \item $B > 0$ is the total resource budget,
+              \item $M \in (0,B]$ is the allocation quota,
+              \item $f : [0,B] \to \mathbb{R}_{+}$ is the production cost function,
+              \item $\theta \ge 1$ is the upper bound on buyers' per-unit valuations (Assumption~\ref{assumption-bounded-value}).
+          \end{itemize}
+
+    \item An \emph{instance} $I = \bigl\{(v_t, r_t)\bigr\}_{t=1}^{T}$ denoting the sequence of arriving buyers, where:
+          \begin{itemize}
+              \item Each buyer $t$ is defined by a per-unit value $v_t \in [1,\theta]$ and an allocation rate limit $r_t \ge 0$,
+              \item The total number of buyers $T$ is unknown a priori.
+          \end{itemize}
+\end{itemize}
+
+\subsection{Offline Optimal Solution}
+
+Let $\Omega$ denote the set of all possible arrival instances satisfying Assumptions~\ref{assumption-bounded-value}, \ref{assumption-quota-feasibility}, and \ref{assumption-quota-profitability}. For any instance $I \in \Omega$, the offline optimal performance $\OPT(I)$ can be obtained by solving the following optimization problem:
+\begin{subequations}\label{equation-quota-primal}
+    \begin{align}
+        \max_{x_t\in[0, r_t]} \quad & \sum_{t\in [T]} v_t x_t - f\left(\sum_{t\in[T]} x_t\right) \\
+        \text{subject to} \quad     & \sum_{t\in[T]} x_t \leq B,                                 \\
+                                    & \sum_{t\in[T]} x_t \geq M.
+    \end{align}
+\end{subequations}
+
+Our design objective is to develop online algorithms that are competitive against $\OPT(I)$ for any instance $I \in \Omega$ while satisfying the budget and quota constraints.
+
+\section{Preliminaries}
+Given a setup $ S = \bigl(B,\,M,\,f,\,\theta\bigr)$, we define the following notations that will be used throughout the chapter.
+
+
 
 
 \section{Sufficient Conditions}
