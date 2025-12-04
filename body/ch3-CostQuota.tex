@@ -24,7 +24,7 @@ Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the tota
 We make the following assumptions regarding the problem setting:
 
 \begin{assumption}[Bounded Valuations]\label{assumption-bounded-value}
-    For each buyer $t \in [T]$ from group $j_t \in [K]$, the per-unit value $v_t$ lies within a known bounded interval $[1, \theta_j]$, where $\theta_j \geq 1$ is a constant. Without loss of generality, we assume $ \theta_0 = 1 $ and $ \theta_1 \leq \theta_2 \leq \dots \leq \theta_K $.
+    For each buyer $t \in [T]$ from group $j_t \in [K]$, the per-unit value $v_t$ lies within a known bounded interval $[1, \theta_{j_t}]$, where $\theta_{j_t} \geq 1 $ is a constant. Without loss of generality, we assume $ \theta_0 = 1 $ and $ \theta_0 \leq \theta_1 \leq \theta_2 \leq \dots \leq \theta_K $.
 \end{assumption}
 
 \begin{assumption}[Quota Feasibility]\label{assumption-quota-feasibility}
@@ -102,12 +102,11 @@ denotes the maximum number of resources produced when all arrivals have value $1
 \[
     \overline{B} =
     \begin{cases}
-        f'^{-1}(\theta), & \theta\in (\underline{c}, \overline{c}), \\
-        B,               & \overline{c} \leq \theta,
+        f'^{-1}(\theta_K), & \theta_K\in (\underline{c}, \overline{c}), \\
+        B,                 & \overline{c} \leq \theta_K,
     \end{cases}
 \]
-denotes the maximum number of resources produced when all arrivals have value $\theta$.
-
+denotes the maximum number of resources produced when all arrivals have value $\theta_K$.
 Next, we extend the production cost function to the entire non-negative real line by defining
 \[
     \bar{f}(y) =
@@ -124,7 +123,7 @@ represents the profit from selling $y$ units at price $v$. We then define the \e
 \[
     h(v) =
     \begin{cases}
-        v\cdot B(v) - f(B(v)),                                                                                           & v\in [1, \theta_1],        \\
+        v\cdot B(v) - f(B(v)),                                                                                           & v\in [1, \theta_1),        \\
         \sum_{j=1}^{K-1} \boldsymbol{1}_{v\in [\theta_j ,\theta_{j+1}]} \Big[v\cdot C_{j+1}(v) + D_{j+1} - f(B(v))\Big], & v\in [\theta_1, \theta_K],
     \end{cases}
 \]
@@ -232,7 +231,7 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
 
 
 \begin{theorem}\label{theorem-quota-general-necessary-conditions}
-    extbf{Necessary Conditions for Quota with Production Costs.}
+    \textbf{Necessary Conditions for Quota with Production Costs.}
     If there exists an $ \alpha $-competitive online algorithm that also satisfies the quota requirement, then there must exist a parameter $ \omega $ that satisfies
     \begin{equation}\label{equation-quota-omega}
         \begin{aligned}
