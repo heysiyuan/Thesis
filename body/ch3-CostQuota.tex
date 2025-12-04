@@ -1,6 +1,6 @@
 \section{Problem Statement}
 
-We consider a seller with a total resource budget $B$ and a production cost function $f:[0,B]\to\mathbb{R}_{+}$. The seller offers the divisible resource to a sequence of buyers indexed by $t\in\{1,\dots,T\}$, with the total number of buyers $T$ unknown. Each buyer $t$ is characterized by a per-unit value $v_t$ and an allocation rate limit $r_t$, and arrives sequentially over time.
+We consider a seller with a total resource budget $B$ and a strictly convex production cost function $f:[0,B]\to\mathbb{R}_{+}$. The seller offers the divisible resource to a sequence of buyers indexed by $t\in\{1,\dots,T\}$, with the total number of buyers $T$ unknown. Each buyer $t$ is characterized by a per-unit value $v_t$ and an allocation rate limit $r_t$, their group identity $ j_t \in [K]$ and arrives sequentially over time.
 
 When buyer $t$ arrives, the seller must irrevocably choose an allocation decision $x_t\in[0,r_t]$ without any information about future buyers. Let $\{x_t\}_{t=1}^T$ denote the resulting allocation, which must satisfy two key constraints.
 
@@ -8,10 +8,11 @@ First, the total allocation cannot exceed the resource budget:
 \[
     \sum_{t\in[T]} x_t \leq B.
 \]
-Second, there is an allocation quota $M$ that must be met:
+Second, there is an allocation quota $m_j \geq 0 $ that must be met for each group $j\in[K]$:
 \[
-    \sum_{t\in[T]} x_t \geq M.
+    \sum_{t\in[T]: j_t = j} x_t \geq m_j, \quad \forall j \in [K].
 \]
+We define $ M = \sum_{j\in[K]} m_j $ as the total allocation quota across all groups.
 
 Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the total value derived from the buyers minus the production cost incurred by the seller:
 \[
@@ -22,20 +23,19 @@ Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the tota
 
 We make the following assumptions regarding the problem setting:
 
-\begin{assumption}[Bounded Valuation]\label{assumption-bounded-value}
-    For each buyer $t \in [T]$, the per-unit value $v_t$ lies within a known bounded interval $[1, \theta]$, where $\theta \geq 1$ is a constant.
+\begin{assumption}[Bounded Valuations]\label{assumption-bounded-value}
+    For each buyer $t \in [T]$ from group $j_t \in [K]$, the per-unit value $v_t$ lies within a known bounded interval $[1, \theta_j]$, where $\theta_j \geq 1$ is a constant. Without loss of generality, we assume $ \theta_0 = 1 $ and $ \theta_1 \leq \theta_2 \leq \dots \leq \theta_K $.
 \end{assumption}
 
 \begin{assumption}[Quota Feasibility]\label{assumption-quota-feasibility}
-    There exist at least $n$ arrivals, where
+    For each class $ j \in [K] $, the total amount of requested resources from all buyers in group $ j $ is sufficient to meet the quota requirement, i.e.,
     \[
-        n = \arg\min_{k} \left\{ \sum_{t=1}^{k} r_t \,\middle|\, \sum_{t=1}^{k} r_t \geq M \right\}
+        \sum_{t\in[T]: j_t = j} r_t \geq m_j.
     \]
-    denotes the smallest integer such that the quota requirement is feasible.
 \end{assumption}
 
 \begin{assumption}[Quota Profitability]\label{assumption-quota-profitability}
-    We assume $f'(M) \leq 1$ (or equivalently, for all $v \in [1, \theta]$, $B(v) \geq M$, or $\underline{B} \geq M$) to ensure that it is always profitable for the seller to satisfy the quota requirement.
+    We assume $f'(M) \leq 1$ (or equivalently, for all $v \in [1, \theta_j]$, $B(v) \geq M$, or $\underline{B} \geq M$) to ensure that it is always profitable for the seller to satisfy the quota requirement.
 \end{assumption}
 
 \subsection{Problem Formulation}
@@ -43,17 +43,18 @@ We make the following assumptions regarding the problem setting:
 Formally, a problem setting can be defined by the following two components:
 
 \begin{itemize}
-    \item A \emph{setup} $S = \bigl(B,\,M,\,f,\,\theta\bigr)$ that includes information known a priori to the seller, where:
+    \item A \emph{setup} $S = \bigl(B,\,M,\,f,\,\{\theta_j\}_{j=1}^K\bigr)$ that includes information known a priori to the seller, where:
           \begin{itemize}
               \item $B > 0$ is the total resource budget,
               \item $M \in (0,B]$ is the allocation quota,
               \item $f : [0,B] \to \mathbb{R}_{+}$ is the production cost function,
-              \item $\theta \ge 1$ is the upper bound on buyers' per-unit valuations (Assumption~\ref{assumption-bounded-value}).
+              \item $ K $ is the number of buyer groups,
+              \item $\{\theta_j\}_{j=1}^K$ are the upper bounds on buyers' per-unit valuations for each group (Assumption~\ref{assumption-bounded-value}).
           \end{itemize}
 
-    \item An \emph{instance} $I = \bigl\{(v_t, r_t)\bigr\}_{t=1}^{T}$ denoting the sequence of arriving buyers, where:
+    \item An \emph{instance} $I = \bigl\{(v_t, r_t, j_t)\bigr\}_{t=1}^{T}$ denoting the sequence of arriving buyers, where:
           \begin{itemize}
-              \item Each buyer $t$ is defined by a per-unit value $v_t \in [1,\theta]$ and an allocation rate limit $r_t \ge 0$,
+              \item Each buyer $t$ is defined by a per-unit value $v_t \in [1,\theta_{j_t}]$, their group $j_t \in [K]$, and an allocation rate limit $r_t \ge 0$,
               \item The total number of buyers $T$ is unknown a priori.
           \end{itemize}
 \end{itemize}
@@ -63,20 +64,166 @@ Formally, a problem setting can be defined by the following two components:
 Let $\Omega$ denote the set of all possible arrival instances satisfying Assumptions~\ref{assumption-bounded-value}, \ref{assumption-quota-feasibility}, and \ref{assumption-quota-profitability}. For any instance $I \in \Omega$, the offline optimal performance $\OPT(I)$ can be obtained by solving the following optimization problem:
 \begin{subequations}\label{equation-quota-primal}
     \begin{align}
-        \max_{x_t\in[0, r_t]} \quad & \sum_{t\in [T]} v_t x_t - f\left(\sum_{t\in[T]} x_t\right) \\
-        \text{subject to} \quad     & \sum_{t\in[T]} x_t \leq B,                                 \\
-                                    & \sum_{t\in[T]} x_t \geq M.
+        \max_{x_t\in[0, r_t]} \quad & \sum_{t\in [T]} v_t x_t - f\left(\sum_{t\in[T]} x_t\right)     \\
+        \text{subject to} \quad     & \sum_{t\in[T]} x_t \leq B,                                     \\
+                                    & \sum_{t\in[T]: j_t = j} x_t \geq m_j, \quad \forall j \in [K].
     \end{align}
 \end{subequations}
 
 Our design objective is to develop online algorithms that are competitive against $\OPT(I)$ for any instance $I \in \Omega$ while satisfying the budget and quota constraints.
 
 \section{Preliminaries}
-Given a setup $ S = \bigl(B,\,M,\,f,\,\theta\bigr)$, we define the following notations that will be used throughout the chapter.
+Given a setup $S = \bigl(B,\,M,\,f,\,\{\theta_j\}_{j=1}^K\bigr)$, we introduce several notations that will be used throughout this chapter. The mathematical definitions remain the same as above; here we organize them more systematically.
 
+We first define the \emph{marginal cost} as $f'(y)$ for any $y \in [0,B]$. The minimum and maximum marginal costs are then
+\[
+    \underline{c} = f'(0), \qquad \overline{c} = f'(B).
+\]
+Based on the marginal cost, we define the \emph{production function}
+\[
+    B(v) =
+    \begin{cases}
+        f'^{-1}(v), & v\in (\underline{c}, \overline{c}), \\
+        B,          & v\in [\overline{c}, \infty),
+    \end{cases}
+\]
+which represents the maximum number of units that can be profitably produced at a marginal cost not exceeding $v$.
 
+From $ B(v) $, we can further define the \emph{minimum production level} $ \underline{B} $ and the \emph{maximum production level} $ \overline{B} $ as follows.
 
+\[
+    \underline{B} =
+    \begin{cases}
+        f'^{-1}(1), & 1\in (\underline{c}, \overline{c}), \\
+        B,          & \overline{c} \leq 1,
+    \end{cases}
+\]
+denotes the maximum number of resources produced when all arrivals have value $1$. Conversely, the \emph{maximum production level}
+\[
+    \overline{B} =
+    \begin{cases}
+        f'^{-1}(\theta), & \theta\in (\underline{c}, \overline{c}), \\
+        B,               & \overline{c} \leq \theta,
+    \end{cases}
+\]
+denotes the maximum number of resources produced when all arrivals have value $\theta$.
+
+Next, we extend the production cost function to the entire non-negative real line by defining
+\[
+    \bar{f}(y) =
+    \begin{cases}
+        f(y),   & y\in [0, B],       \\
+        \infty, & y \in (B, \infty).
+    \end{cases}
+\]
+For any unit price $v$, the \emph{profit function}
+\[
+    F_v(y) = v y - \bar{f}(y)
+\]
+represents the profit from selling $y$ units at price $v$. We then define the \emph{maximum profit function}
+\[
+    h(v) =
+    \begin{cases}
+        v\cdot B(v) - f(B(v)),                                                                                           & v\in [1, \theta_1],        \\
+        \sum_{j=1}^{K-1} \boldsymbol{1}_{v\in [\theta_j ,\theta_{j+1}]} \Big[v\cdot C_{j+1}(v) + D_{j+1} - f(B(v))\Big], & v\in [\theta_1, \theta_K],
+    \end{cases}
+\]
+which gives the optimal profit attainable when the highest per-unit value in the arrival sequence is $v$. Here,
+\(C_j(v) = B(v) - \sum_{i=1}^{j-1} m_i\) is the remaining production capacity after satisfying the quota requirements of groups \(1\) through \(j-1\), and
+\(D_j = \sum_{i=1}^{j-1} m_i \theta_i\) is the maximum value from meeting those quota requirements.
+
+\begin{remark}
+    Given that $ f $ is strictly convex and differentiable on $ [0, B] $, its derivative $ f' $ is strictly increasing on $ [0, B] $ and therefore admits a continuous inverse $ B(v) $. Furthermore, $ h $ is concave and continuous on $ [1, \theta_K] $ and differentiable on each open interval $ (\theta_j, \theta_{j+1}) $, with $ h'(v) = C_{j+1}(v) $ for $ v $ in each open interval $ (\theta_j, \theta_{j+1}) $.
+\end{remark}
 
 \section{Sufficient Conditions}
 
+ {\color{red}Posted price mechanism to go here.}
+
+
+The key to the Posted price mechanism is to design a pricing function $ \varphi(u) $ that dynamically adjusts the unit price based on the cumulative allocation $ u $ made so far.
+
+
+
+\begin{theorem}\label{therem-sufficient-cost-quota}
+    Given a setup $ S $, the posted price mechanism with pricing function $\phi$ is $\alpha$-competitive if $\phi$ satisfies
+    \begin{equation}\label{eq:phi-definition}
+        \phi(u) =
+        \begin{cases}
+            1,          & u \in [0, \omega],            \\
+            \varphi(u), & u \in (\omega, \overline{B}], \\
+            \infty,     & u \in (\overline{B}, \infty],
+        \end{cases}
+    \end{equation}
+    where $\omega$ is a resource-utilization threshold such that
+    \begin{equation}\label{eq:omega-condition}
+        F_1(\omega) \geq \frac{1}{\alpha} h(1)
+        \quad\text{and}\quad
+        M \leq \omega \leq \underline{B},
+    \end{equation}
+    and $ \varphi(u) $ is an increasing function that satisfies
+    \begin{equation}\label{eq:phi-incremental-condition}
+        \begin{cases}
+            \varphi'(u) \leq \alpha \cdot \frac{\varphi(u) - f'(u)}{h'(\varphi(u))}
+            \quad\text{for } u \in [\omega, \overline{B}] \\
+            \varphi(\omega) = 1, \varphi(\overline{B}) \geq \theta
+        \end{cases}
+    \end{equation}
+\end{theorem}
+
+\begin{proof}
+    For a given setup $ S $ and an instance $ I \in \Omega $ with arrival sequence $ \{(v_t, r_t)\}_{t=1}^T $, Let $ u $ denote the final total allocation level made by the online algorithm on $ I $, and let $ \ALG(I) $ and $ \OPT(I) $ be the corresponding online and offline performances.
+
+    From the definition of the maximum profit function, we can upper bound the offline optimal performance as
+    \begin{align*}
+        \OPT(I) \leq h\bigl(\max_t v_t\bigr).
+    \end{align*}
+
+    Given that $ u $ denotes the final utilization level of the online algorithm, we have $ \max_t v_t \leq \varphi(u) $ by the design of the posted price mechanism. Therefore,
+    \begin{align*}
+        \OPT(I) \leq h(\varphi(u)).
+    \end{align*}
+
+    On the other hand, the online algorithm's performance on $ I $ can be lower bounded as
+    \begin{align*}
+        \ALG(u) & \geq \int_{0}^{u} \varphi(y)dy - f(u)                                                            \\
+                & = \int_{0}^{\omega} 1 dy + \int_{\omega}^{u} \varphi(y)dy - f(\omega) - \int_{\omega}^{u}f'(y)dy \\
+                & = \omega - f(\omega) + \int_{\omega}^{u} (\varphi(y) - f'(y))dy                                  \\
+    \end{align*}
+
+    Define the auxiliary function $ H(u) = \ALG(u) - \frac{1}{\alpha} h(\varphi(u)) $ to denote the performance gap of the online algorithm against the offline optimal to be $ \alpha $-competitive. If we can show that $ H(u) \geq 0 $ for all $ u \in [0, \overline{B}] $, then we have that the online algorithm is $ \alpha $-competitive against any instance $ I \in \Omega $. This can be achieved by first establishing an initial inequality at $ u = \omega $ and then showing an incremental inequality for all $ u \in [\omega, \overline{B}] $.
+
+    \textbf{Initial inequality:} We first argue that the online algorithm always allocates at least $M$ units. By Assumption~\ref{assumption-quota-feasibility}, there are enough arrivals to meet all quotas, and by construction the first $\omega$ units are allocated unconditionally at price $1$. If the total requested amount is less than $\omega$, then, since $\omega \leq \underline{B}$, it is profitable for both the online and offline solutions to allocate all requested resources, implying $\ALG(I) = \OPT(I)$ in this case.
+
+    At $ u = \omega $, we have the following initial inequality:
+    \begin{align*}
+        H(\omega) & = \omega - f(\omega) - \frac{1}{\alpha} h(1)                                    \\
+                  & = F_1(\omega) - \frac{1}{\alpha} h(1)                                           \\
+                  & \geq 0 \quad \text{(by the choice of $ \omega $ in \eqref{eq:omega-condition})}
+    \end{align*}
+
+    \textbf{Incremental inequality and monotonicity of $ H $:} Next, we verify the incremental condition to ensure that $ H(u) $ is non-decreasing on $ [\omega, \overline{B}] $. Taking the derivative of $ H(u) $ with respect to $ u $, we have
+    \begin{align*}
+        H'(u) & = \varphi(u) - f'(u) - \frac{1}{\alpha} h'(\varphi(u)) \cdot \varphi'(u) \\
+    \end{align*}
+
+    To guarantee that $ H $ is non-decreasing, it suffices to require $ H'(u) \geq 0 $ for all $ u \in [\omega, \overline{B}] $. From the above equation, this is equivalent to
+    \begin{align*}
+        \varphi'(u) \leq \alpha \cdot \frac{\varphi(u) - f'(u)}{h'(\varphi(u))} \quad\text{for } u \in [\omega, \overline{B}].
+    \end{align*}
+    which is precisely the incremental condition in \eqref{eq:phi-incremental-condition}.
+
+    Since $ H(\omega) \geq 0 $ and $ H'(u) \geq 0 $ for all $ u \in [\omega, \overline{B}] $, we obtain $ H(u) \geq 0 $ for all $ u \in [\omega, \overline{B}] $. For $ u < \omega $, the online algorithm allocates all requested resources, leading to $ \ALG(I) = \OPT(I) $. Therefore, the posted price mechanism with pricing function $ \phi $ is $ \alpha $-competitive. Finally, given that $ \phi(u) = \infty $ for all $ u > \overline{B} $ and $ \overline{B} \leq B $, the online algorithm will never exceed the resource budget.
+
+\end{proof}
+
 \section{Necessary Conditions}
+\begin{definition}
+    \textbf{Hard Instance Family for Quota with Production Costs.}
+    Consider the construction of the hard instance $ I_(v) $ as in \cite{10.1145/3726854.3727299, tan2020mechanism}, where there is a continuum of values increasing from $ 1 $ to $ \theta_K $, with each value repeated for every class as long as it remains feasible:
+    \begin{align*}
+        I^{\GFQ} = \Biggl\{ & \underbrace{(1, 1), (1,2), \dots , (1, K)}_{K\textit{ agents}}, \underbrace{(1+\epsilon, 1), \dots, (1+\epsilon, K)}_{K\textit{ agents}}, \dots,                                                                                            \\
+                            & \underbrace{(\theta_{1}, 1), \dots ,(\theta_{1}, K)}_{K\textit{ agents}}, \underbrace{(\theta_{1}+\epsilon, 2), \dots , (\theta_{1}+\epsilon, K)}_{K-1 \textit{ agents}}, \dots, \underbrace{(\theta_{K}, K)}_{1\textit{ agent}}  \Biggr\}.
+    \end{align*}
+    Based on the above construction of $ I^{\GFQ} $, we then consider the family of instances $ \{I^{\GFQ}_v\}_{v \in [1, \theta_K]} $, where each $I^{\GFQ}_v$ instance has the structure as $ I^{\GFQ} $, but is truncated up until and including arrivals with value $ v $.
+\end{definition}
