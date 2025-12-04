@@ -231,17 +231,17 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
 \end{definition}
 
 
-\begin{theorem}\label{theorem-gfq-general-necessary-conditions}
-    \textbf{Necessary Conditions for Quota with Production Costs.}
-    If there exists an $ \alpha $-competitive online algorithm that also satisfies the GFQ requirement, then there must exist a parameter $ \omega $ that satisfies
-    \begin{equation}\label{equation-gfq-omega}
+\begin{theorem}\label{theorem-quota-general-necessary-conditions}
+    extbf{Necessary Conditions for Quota with Production Costs.}
+    If there exists an $ \alpha $-competitive online algorithm that also satisfies the quota requirement, then there must exist a parameter $ \omega $ that satisfies
+    \begin{equation}\label{equation-quota-omega}
         \begin{aligned}
             F_1(\omega) = \frac{1}{\alpha} h(1), \text{ and } M \leq \omega \leq \underline{B}.
         \end{aligned}
     \end{equation}
     such that there exists a non-decreasing utilization function $ \psi(v): [1, \theta_K] \to [\omega, \bar{B}] $ that satisfies
 
-    \begin{equation}\label{equation-gfq-utilization}
+    \begin{equation}\label{equation-quota-utilization}
         \begin{aligned}
             \begin{cases}
                 \psi(1) + \int_{1}^{v} u d\psi(u) - f(\psi(v)) \geq & \frac{1}{\alpha} \Big[v(B(v) - M) + v\sum\limits_{i\geq j}m_i                                   \\
@@ -289,13 +289,91 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
         \ALG(\mathcal{I}^{\mathrm{Q}}_v) \geq \psi(1) + \int_{1}^{v} u \, d\psi(u) - f(\psi(v)).
     \end{align*}
 
-    Thus, to guarantee $ \alpha $-competitiveness against the arrival instance $ I^{\GFQ}_v $, the following differential equation has to hold for all $ v \in [\theta_{j-1}, \theta_j] $:
+    Thus, to guarantee $ \alpha $-competitiveness against the arrival instance $ \mathcal{I}^{\mathrm{Q}}_v $, the following inequality has to hold for all $ v \in [\theta_{j-1}, \theta_j] $:
     \begin{align*}
         \psi(1) + \int_{1}^{v} u d\psi(u) - f(\psi(v)) \geq & \frac{1}{\alpha} \Big[v(B(v) - M) + v\sum\limits_{i\geq j}m_i + \sum\limits_{i < j} m_i\theta_i - f(B(v))\Big]
     \end{align*}
 
-    Putting it together, if there exists an $ \alpha $-competitive online algorithm that satisfies the GFQ requirement, then there must exist a non-decreasing utilization function $ \psi(v) $ that satisfies the above equation with boundary conditions $ \psi(1) = \omega $ and $ \psi(\theta_K) \leq \bar{B} $, as stated in equation \eqref{equation-gfq-utilization}.
+    Putting it together, if there exists an $ \alpha $-competitive online algorithm that satisfies the quota requirement, then there must exist a non-decreasing utilization function $ \psi(v) $ that satisfies the above inequality with boundary conditions $ \psi(1) = \omega $ and $ \psi(\theta_K) \leq \bar{B} $, as stated in equation \eqref{equation-quota-utilization}.
 \end{proof}
 
 
 
+Given the general necessary conditions in Theorem \ref{theorem-quota-general-necessary-conditions}, we now show the existence of strictly increasing allocation and pricing functions that satisfy them.
+\begin{theorem}
+    If there exists an $ \alpha $-competitive online algorithm that satisfies the quota requirement, then the following conditions must hold:
+    \begin{itemize}
+        \item there exists a strictly increasing allocation function $ \psi(v) $ such that
+              \begin{equation}\label{equation-quota-increasing-utilization}
+                  \begin{aligned}
+                      \begin{cases}
+                          \psi'(v) = \frac{1}{\alpha}\cdot \frac{h'(v)}{v - f'(\psi(v))}, \quad & v\in (\theta_{j-1}, \theta_j), \\
+                          \psi(1) = \omega, \psi(\theta_K) \leq \bar{B}.
+                      \end{cases}
+                  \end{aligned}
+              \end{equation}
+        \item there exists a strictly increasing pricing function $ \varphi(u) $ such that
+              \begin{equation}\label{equation-quota-increasing-pricing}
+                  \begin{aligned}
+                      \begin{cases}
+                          \varphi'(u) = \alpha \cdot \frac{\varphi(u) - f'(u)}{h'(\varphi(u))}, \quad & u\in (\omega, \bar{B}), \\
+                          \varphi(\omega) = 1, \varphi(\bar{B}) \geq \theta_K.
+                      \end{cases}
+                  \end{aligned}
+              \end{equation}
+    \end{itemize}
+
+
+\end{theorem}
+
+\begin{proof}
+
+    We can interpret $ h(v) / \alpha $ as the minimum profit required for an online algorithm to be $ \alpha $-competitive under the arrival instance $ \mathcal{I}^{\mathrm{Q}}_v $. We can then rewrite the inequality in equation \eqref{equation-quota-utilization} as follows:
+    \begin{align}
+        \psi(1) + \int_{1}^{v} u \, d\psi(u) - f(\psi(v)) \geq \frac{1}{\alpha} \cdot h(v), \quad \forall v \in [\theta_{j-1}, \theta_j].
+    \end{align}
+    Using integration by parts, we can rewrite the above inequality as
+    \begin{align*}
+        \psi(1) + [u\psi(u)]\Big|_1^v -\int_1^v \psi(u) du - f(\psi(v)) & \geq  \frac{1}{\alpha}\cdot h(v) \\
+        v\psi(v) - \int_{1}^{v} \psi(u) du - f(\psi(v))                 & \geq \frac{1}{\alpha}\cdot h(v).
+    \end{align*}
+    Rearranging the terms, we have
+    \begin{align*}
+        \psi(v) \geq \frac{h(v) + \alpha f(\psi(v))}{\alpha v} + \frac{1}{v} \int_{1}^{v} \psi(u) du.
+    \end{align*}
+
+    Let $ M(v) = \frac{h(v) + \alpha f(\psi(v))}{\alpha v} $, $ N(v) = \frac{1}{v} $ and $ Q(\psi(u)) = \psi(u) + f'(\psi(u)) $. We can rewrite the above inequality as
+    \begin{align*}
+        \psi(v) \geq M(v) + N(v) \int_{1}^{v} Q(\psi(u)) du, v \in [\theta_{j-1}, \theta_j].
+    \end{align*}
+
+
+    Note that the above equation is a non-linear generalization of Grönwall's inequality \cite{teschl2012ordinary}. Hence there exists a tightest lower bound $ \psi_L(v) $ such that $ \psi_L(v) \leq \psi(v) $ for all $ v \in [1, \theta_K] $ among all non-decreasing functions $ \psi(v) $ that satisfy the above inequality with boundary conditions $ \psi(1) = \omega $ and $ \psi(\theta_K) \leq \bar{B} $. By definition of this tightest lower bound, $ \psi_L(v) $ satisfies the equality
+    \begin{align*}
+        \psi_L(v) & = M(v) + N(v) \int_{1}^{v} Q(\psi_L(u)) du,
+    \end{align*}
+    and, differentiating both sides with respect to $ v $ on any interval $ (\theta_{j-1}, \theta_j) $ where $ h $ is differentiable and $ h'(v) > 0 $, we obtain
+    \begin{align*}
+        \psi'_L(v) = \frac{1}{\alpha}\cdot \frac{h'(v)}{v - f'(\psi_L(v))}, \quad v \in (\theta_{j-1}, \theta_j).
+    \end{align*}
+    Here we used that $ M $ and $ N $ are differentiable on each such interval and that $ Q $ is continuous and non-negative, so that the right-hand side is well defined. At each boundary point $ \theta_j $, by the definition of $ h(v) $ and $ B(v) $, both $ N(\theta_j) $ and $ \int_{1}^{\theta_j} Q(\psi_L(u))du $ are continuous, and thus $ N(\theta_j) \int_{1}^{\theta_j} Q(\psi_L(u))du $ is also continuous. The term $ M(v) $ is continuous at $ \theta_j $ since $ h $ is continuous. Therefore, $ \psi_L(v) $ is a continuous function that is strictly increasing over each interval $ (\theta_{j-1}, \theta_j) $. It is therefore overall a strictly increasing function over the entire interval $ [1, \theta_K] $.
+
+
+    \textbf{Existence of Strictly Increasing Pricing Functions.} Given that $ \psi $ is strictly increasing, its inverse $ \psi^{-1} $ is well-defined and also strictly increasing. Let $ \varphi(u) = \psi^{-1}(u) = v $. Since $ \varphi(u) = \varphi(\psi(v)) = v $, taking derivatives on both sides yields
+    \begin{align*}
+        \varphi'(\psi(v))\cdot \psi'(v) = 1,
+    \end{align*}
+    and consequently
+    \begin{align*}
+        \psi'(v) = \frac{1}{\varphi'(\psi(v))} = \frac{1}{\varphi'(u)}.
+    \end{align*}
+    Therefore, we have that
+    \begin{align*}
+        \varphi'(u) = \frac{1}{\psi'(v)}.
+    \end{align*}
+    Substituting equation \eqref{equation-quota-increasing-utilization} into the above equation and using $ u = \psi(v) $ and $ v = \varphi(u) $, we obtain
+    \begin{align*}
+        \varphi'(u) = \alpha \cdot \frac{\varphi(u) - f'(u)}{h'(\varphi(u))}, \quad u \in (\omega, \bar{B}),
+    \end{align*}
+    which is precisely the differential equation in \eqref{equation-quota-increasing-pricing}, together with the boundary conditions $ \varphi(\omega) = 1 $ and $ \varphi(\bar{B}) \geq \theta_K $.
+\end{proof}
