@@ -141,7 +141,7 @@ which gives the optimal profit attainable when the highest per-unit value in the
  {\color{red}Posted price mechanism to go here.}
 
 
-The key to the Posted price mechanism is to design a pricing function $ \varphi(u) $ that dynamically adjusts the unit price based on the cumulative allocation $ u $ made so far.
+The key to the posted price mechanism is to design a pricing function $ \phi(u) $ that dynamically adjusts the unit price based on the cumulative allocation $ u $ made so far.
 
 
 
@@ -218,12 +218,84 @@ The key to the Posted price mechanism is to design a pricing function $ \varphi(
 \end{proof}
 
 \section{Necessary Conditions}
+Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of exposition, and thus denoting an arrival instance as $ I = \{(v_1, j_1), (v_2, j_2), \cdots, (v_T, j_T) \} $, where $ (v_t, j_t) $ represents an arrival from class $ j_t $ with value $ v_t $.
+
 \begin{definition}
     \textbf{Hard Instance Family for Quota with Production Costs.}
-    Consider the construction of the hard instance $ I_(v) $ as in \cite{10.1145/3726854.3727299, tan2020mechanism}, where there is a continuum of values increasing from $ 1 $ to $ \theta_K $, with each value repeated for every class as long as it remains feasible:
+    Consider the construction of the hard instance $ \mathcal{I}^{\mathrm{Q}} $, where there is a continuum of values increasing from $ 1 $ to $ \theta_K $, with each value repeated for every class as long as it remains feasible:
     \begin{align*}
-        I^{\GFQ} = \Biggl\{ & \underbrace{(1, 1), (1,2), \dots , (1, K)}_{K\textit{ agents}}, \underbrace{(1+\epsilon, 1), \dots, (1+\epsilon, K)}_{K\textit{ agents}}, \dots,                                                                                            \\
-                            & \underbrace{(\theta_{1}, 1), \dots ,(\theta_{1}, K)}_{K\textit{ agents}}, \underbrace{(\theta_{1}+\epsilon, 2), \dots , (\theta_{1}+\epsilon, K)}_{K-1 \textit{ agents}}, \dots, \underbrace{(\theta_{K}, K)}_{1\textit{ agent}}  \Biggr\}.
+        \mathcal{I}^{\mathrm{Q}}= \Biggl\{ & \underbrace{(1, 1), (1,2), \dots , (1, K)}_{K\textit{ agents}}, \underbrace{(1+\epsilon, 1), \dots, (1+\epsilon, K)}_{K\textit{ agents}}, \dots,                                                                                            \\
+                                           & \underbrace{(\theta_{1}, 1), \dots ,(\theta_{1}, K)}_{K\textit{ agents}}, \underbrace{(\theta_{1}+\epsilon, 2), \dots , (\theta_{1}+\epsilon, K)}_{K-1 \textit{ agents}}, \dots, \underbrace{(\theta_{K}, K)}_{1\textit{ agent}}  \Biggr\}.
     \end{align*}
-    Based on the above construction of $ I^{\GFQ} $, we then consider the family of instances $ \{I^{\GFQ}_v\}_{v \in [1, \theta_K]} $, where each $I^{\GFQ}_v$ instance has the structure as $ I^{\GFQ} $, but is truncated up until and including arrivals with value $ v $.
+    Based on the above construction of $ \mathcal{I}^{\mathrm{Q}} $, we then consider the family of instances $ \{\mathcal{I}^{\mathrm{Q}}_v\}_{v \in [1, \theta_K]} $, where each $\mathcal{I}^{\mathrm{Q}}_v$ instance has the structure as $ \mathcal{I}^{\mathrm{Q}} $ but is truncated up until and including arrivals with value $ v $.
 \end{definition}
+
+
+\begin{theorem}\label{theorem-gfq-general-necessary-conditions}
+    \textbf{Necessary Conditions for Quota with Production Costs.}
+    If there exists an $ \alpha $-competitive online algorithm that also satisfies the GFQ requirement, then there must exist a parameter $ \omega $ that satisfies
+    \begin{equation}\label{equation-gfq-omega}
+        \begin{aligned}
+            F_1(\omega) = \frac{1}{\alpha} h(1), \text{ and } M \leq \omega \leq \underline{B}.
+        \end{aligned}
+    \end{equation}
+    such that there exists a non-decreasing utilization function $ \psi(v): [1, \theta_K] \to [\omega, \bar{B}] $ that satisfies
+
+    \begin{equation}\label{equation-gfq-utilization}
+        \begin{aligned}
+            \begin{cases}
+                \psi(1) + \int_{1}^{v} u d\psi(u) - f(\psi(v)) \geq & \frac{1}{\alpha} \Big[v(B(v) - M) + v\sum\limits_{i\geq j}m_i                                   \\
+                                                                    & + \sum\limits_{i < j} m_i\theta_i - f(B(v))\Big], \quad \forall v \in [\theta_{j-1}, \theta_j], \\
+                \psi(1) = \omega, \psi(\theta_K) \leq \bar{B}.
+            \end{cases}
+        \end{aligned}
+    \end{equation}
+\end{theorem}
+\begin{proof}
+    \textbf{Boundary conditions.}
+    The utilization of any online algorithm cannot exceed the maximum profitable production level, hence
+    \[
+        \psi(\theta_K) \le \overline{B}.
+    \]
+    Consider the instance $\mathcal{I}^{\mathrm{Q}}_1$, where all arrivals have value $1$. By Assumptions~\ref{assumption-quota-feasibility} and \ref{assumption-quota-profitability}, it is feasible and profitable to first satisfy all quotas $m_j$ and then keep allocating to value-$1$ buyers until the marginal cost reaches $1$, i.e., until total production reaches $\underline{B}$. Thus
+    \[
+        \OPT(\mathcal{I}^{\mathrm{Q}}_1) = h(1) = F_1(\underline{B}) = \underline{B} - f(\underline{B}).
+    \]
+    Any $\alpha$-competitive online algorithm must therefore achieve at least $\frac{1}{\alpha} h(1)$ profit on $\mathcal{I}^{\mathrm{Q}}_1$ while allocating at least $M$ units to satisfy the quotas. Since $\omega$ is defined as the \emph{minimum} allocation level at which this is possible and satisfies
+    \[
+        F_1(\omega) = \omega - f(\omega) = \frac{1}{\alpha} h(1), \quad M \le \omega \le \underline{B},
+    \]
+    the algorithm's utilization level at value $1$ must therefore satisfy
+    \[
+        \psi(1) = \omega.
+    \]
+
+    \textbf{Incremental Inequalities.}
+    Given that decisions are irrevocable, the utilization function $\psi$ must be non-decreasing, i.e.,
+    $
+        \psi : [1,\theta_K] \to [\omega,\overline{B}] \quad\text{is non-decreasing.}
+    $
+
+    Fix $v \in [\theta_{j-1},\theta_j]$ for some $j\in[K]$ and consider the truncated hard instance $\mathcal{I}^{\mathrm{Q}}_v$. By construction, the maximum value in $\mathcal{I}^{\mathrm{Q}}_v$ is $v$, and the maximum profitable total production is therefore $B(v)$.
+
+    In any quota satisfying offline solution for $\mathcal{I}^{\mathrm{Q}}_v$, at least $m_i$ units must be allocated to each group $i$. For group $i<j$ with highest value $\theta_i$ less than $v$, quota allocations yield at most $m_i\theta_i$; for groups $i\ge j$ with highest value at least $v$, they yield at most $m_iv$. The remaining $B(v)-M$ units, if any, yield at most $v$ per unit. Hence
+    \[
+        \OPT(\mathcal{I}^{\mathrm{Q}}_v)
+        \le v(B(v)-M) + v\sum_{i\ge j} m_i + \sum_{i<j} m_i \theta_i - f(B(v)).
+    \]
+
+    For any online algorithm with utilization function $\psi$, its performance on instance $\mathcal{I}^{\mathrm{Q}}_v$ can be lower bounded as
+    \begin{align*}
+        \ALG(\mathcal{I}^{\mathrm{Q}}_v) \geq \psi(1) + \int_{1}^{v} u \, d\psi(u) - f(\psi(v)).
+    \end{align*}
+
+    Thus, to guarantee $ \alpha $-competitiveness against the arrival instance $ I^{\GFQ}_v $, the following differential equation has to hold for all $ v \in [\theta_{j-1}, \theta_j] $:
+    \begin{align*}
+        \psi(1) + \int_{1}^{v} u d\psi(u) - f(\psi(v)) \geq & \frac{1}{\alpha} \Big[v(B(v) - M) + v\sum\limits_{i\geq j}m_i + \sum\limits_{i < j} m_i\theta_i - f(B(v))\Big]
+    \end{align*}
+
+    Putting it together, if there exists an $ \alpha $-competitive online algorithm that satisfies the GFQ requirement, then there must exist a non-decreasing utilization function $ \psi(v) $ that satisfies the above equation with boundary conditions $ \psi(1) = \omega $ and $ \psi(\theta_K) \leq \bar{B} $, as stated in equation \eqref{equation-gfq-utilization}.
+\end{proof}
+
+
+
