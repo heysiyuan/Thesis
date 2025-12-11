@@ -77,9 +77,9 @@ Intuitively,we need to select $ \lambda $ in a way that it updates according to 
         \State $y_{j_t} = 0$
         \EndIf
 
-        \State $x^G_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_{j_t}} u\right)du \right\}$
+        \State $x^G_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{B-M} u\right)du \right\}$
 
-        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{1-M} u\right)du \right\}$
+        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_{j_t}} u\right)du \right\}$
 
         \For{each $i \in [K]\setminus\{j_t\}$}
         \State $x^i_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t} + \beta_i} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_i} u\right)du \right\}$
@@ -137,7 +137,9 @@ In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} addition
         \Delta P_t = v_t\cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t.
     \end{align*}
     Based on the arriving agent's value $ v_t $, we consider the following cases for the change in the dual objective:
-    \paragraph{Case 1.} If $ v_t \geq \eta^{t-1}_{j_t} $ but $ v_t < \lambda^{t-1} $, the only source of allocation is the class-specific allocation $ x^{j_t}_t $. The dual change can be expressed as:
+    \paragraph{Case 1.} If $ v_t < \eta^{t-1}_{j_t} $ and $ v_t < \lambda^{t-1} $, then no dual variable is updated at time $ t $, and thus $ \Delta D_t = 0 $. It is also easy to see that the primal allocation $ x_t = 0 $ in this case, leading to $ \Delta P_t = 0 $. Therefore, we have $ \Delta P_t = 0 \geq \Delta D_t/\alpha $.
+
+    \paragraph{Case 2.} If $ v_t \geq \eta^{t-1}_{j_t} $ but $ v_t < \lambda^{t-1} $, the only source of allocation is the class-specific allocation $ x^{j_t}_t $. The dual change can be expressed as:
     \begin{align*}
         \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})
     \end{align*}
@@ -169,30 +171,52 @@ In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} addition
         e^{y} \cdot \frac{m_{j_t}}{\alpha} y & \geq \frac{m_{j_t}}{\alpha} \bigl(e^{y} - 1\bigr) \\
         e^{y} y                              & \geq e^{y} - 1
     \end{align*}
-    Define $ g(y) := e^{y} y - e^{y} + 1 = e^{y}(y-1) + 1 $. Given that $ g(0) = 0, g'(y) = e^{y}(y-1) + e^{y} = e^{y} y \geq 0 $ for all $ y \geq 0 $, $ g $ is non-decreasing on $ [0, \infty) $ and $ g(y) \geq g(0) = 0 $ for all $ y \geq 0 $, which is equivalent to $ e^{y} y \geq e^{y} - 1 $ for all $ y \geq 0 $. Therefore, we obtain $ \Delta P_t \geq \Delta D_t/\alpha $ in Case 1.
+    Define $ g(y) := e^{y} y - e^{y} + 1 = e^{y}(y-1) + 1 $. Given that $ g(0) = 0, g'(y) = e^{y}(y-1) + e^{y} = e^{y} y \geq 0 $ for all $ y \geq 0 $, $ g $ is non-decreasing on $ [0, \infty) $ and $ g(y) \geq g(0) = 0 $ for all $ y \geq 0 $, which is equivalent to $ e^{y} y \geq e^{y} - 1 $ for all $ y \geq 0 $. Therefore, we obtain $ \Delta P_t \geq \Delta D_t/\alpha $.
 
+    \paragraph{Case 3.} If $ v_t \geq \eta^{t-1}_{j_t} $ and $ v_t \geq \lambda^{t-1} $, but $ v_t - \beta_i \leq \eta^{t-1}_i $ for all $ i \ne j_t $, the only sources of allocation are the global allocation $ x^G_t $ and the class-specific allocation $ x^{j_t}_t $. The dual change can be expressed as:
+    \begin{align*}
+        \Delta D_t = (B-M) \cdot (\lambda^t - \lambda^{t-1}) + m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})
+    \end{align*}
+    By the design of $ x^G_t $ and $ x^{j_t}_t $ in Algorithm \ref{alg_LinearToZero} being the maximizers of the stated expressions, we have the following from the first-order conditions:
+    \begin{align*}
+        \exp\left(\tfrac{\alpha}{B-M} x^G_t\right)         & = \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}},    \\
+        \exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) & = \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}}.
+    \end{align*}
+    Applying the same change-of-variable and rearrangement arguments as in Case 2 to both $ x^G_t $ and $ x^{j_t}_t $, we can show that
+    \begin{align*}
+        \Delta P_t^G     & \geq \frac{1}{\alpha} (B-M) \cdot (\lambda^t - \lambda^{t-1}),         \\
+        \Delta P_t^{j_t} & \geq \frac{1}{\alpha} m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}),
+    \end{align*}
+    where $ \Delta P_t^G = (v_t + \beta^t_{j_t}) x^G_t $ and $ \Delta P_t^{j_t} = (v_t + \beta^t_{j_t}) x^{j_t}_t $. Summing these two inequalities gives
+    \begin{align*}
+        \Delta P_t = \Delta P_t^G + \Delta P_t^{j_t} \geq \frac{1}{\alpha} \left((B-M) \cdot (\lambda^t - \lambda^{t-1}) + m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})\right) = \frac{1}{\alpha} \Delta D_t.
+    \end{align*}
 
-    % \paragraph{Case 2.} If $ v_t < \eta^{t-1}_{j_t} $, then the dual variable $ \eta_{j_t} $ is updated to $ v_t $ and the allocation for group $ j_t $ is $ 0 $. Thus, we have:
-    % \begin{align*}
-    %     \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}) =  m_{j_t} \cdot (v_t - \eta^{t-1}_{j_t}) \le 0,
-    % \end{align*}
-    % and
-    % \begin{align*}
-    %     \Delta P_t = v_t \cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t \ge 0.
-    % \end{align*}
-    % Therefore, the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ holds.
+    \paragraph{Case 4.} If $ v_t \geq \eta^{t-1}_{j_t} $ and $ v_t \geq \lambda^{t-1} $, and there exists some $ i \ne j_t $ with $ v_t - \beta_i > \eta^{t-1}_i $, the sources of allocation include the global allocation $ x^G_t $, the class-specific allocation $ x^{j_t}_t $, and the cross-class allocations $ x^i_t $ for all such $ i $. Let $ I_t \subseteq [K] \setminus \{j_t\} $ denote the set of classes whose dual variables increase at time $ t $. The dual change can be expressed as:
+    \begin{align*}
+        \Delta D_t = (B-M) \cdot (\lambda^t - \lambda^{t-1}) + m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}) + \sum_{i \in I_t} m_i \cdot (\eta^t_i - \eta^{t-1}_i)
+    \end{align*}
+    By the design of $ x^G_t $, $ x^{j_t}_t $, and $ x^i_t $ in Algorithm \ref{alg_LinearToZero} being the maximizers of the stated expressions, we have the following from the first-order conditions:
+    \begin{align*}
+        \exp\left(\tfrac{\alpha}{B-M} x^G_t\right)         & = \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}},                                   \\
+        \exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) & = \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}},                                \\
+        \exp\left(\tfrac{\alpha}{m_i} x^i_t\right)         & = \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_i + \beta^t_{j_t} + \beta_i}, \quad \forall i \in I_t.
+    \end{align*}
+    similarly, we can show that
+    \begin{align*}
+        \Delta P_t^G     & \geq \frac{1}{\alpha} (B-M) \cdot (\lambda^t - \lambda^{t-1}),                      \\
+        \Delta P_t^{j_t} & \geq \frac{1}{\alpha} m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}),              \\
+        \Delta P_t^{i}   & \geq \frac{1}{\alpha} m_i \cdot (\eta^t_i - \eta^{t-1}_i), \quad \forall i \in I_t,
+    \end{align*}
+    where $ \Delta P_t^G = (v_t + \beta^t_{j_t}) x^G_t $, $ \Delta P_t^{j_t} = (v_t + \beta^t_{j_t}) x^{j_t}_t $, and $ \Delta P_t^{i} = (v_t + \beta^t_{j_t}) x^{i}_t $ for all $ i \in I_t $. Summing over all active components gives
+    \begin{align*}
+        \Delta P_t & = \Delta P_t^G + \Delta P_t^{j_t} + \sum_{i\in I_t}\Delta P_t^{i} \\
+                   & \ge \frac{1}{\alpha}\Big((B-M)(\lambda^t-\lambda^{t-1})
+        + m_{j_t}(\eta^t_{j_t}-\eta^{t-1}_{j_t})
+        + \sum_{i\in I_t} m_i(\eta^t_i-\eta^{t-1}_i)\Big)                              \\
+                   & = \frac{1}{\alpha}\Delta D_t.
+    \end{align*}
 
-    % \paragraph{Case 3.} If $ v_t \geq \lambda^{t-1} $, then the dual variable $ \lambda $ is updated to $ v_t $, and the allocation is made to the group with the highest value. Without loss of generality, assume that $ j_t = 1 $ is the group with the highest value. Then, we have:
-    % \begin{align*}
-    %     \Delta D_t = (B-M) \cdot (\lambda^t - \lambda^{t-1}) + m_1 \cdot (\eta^t_1 - \eta^{t-1}_1) \ge 0,
-    % \end{align*}
-    % and
-    % \begin{align*}
-    %     \Delta P_t = v_t \cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t \ge 0.
-    % \end{align*}
-    % Therefore, the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ holds.
-
-    % \paragraph{Case 4.} If $ \eta^{t-1}_{j_t} \geq \lambda^{t-1} $, then the dual variable $ \eta_{j_t} $ is updated according to the class-specific update rule, and the allocation is made to the group with the highest value. The analysis for this case is similar to Case 3, and the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ also holds.
 \end{proof}
 
 
