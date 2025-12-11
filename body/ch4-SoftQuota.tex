@@ -16,7 +16,7 @@ Our objective is then to maximize the overall social welfare $\mathcal{W}(\mathb
 \begin{subequations}\label{equation-soft-quota-primal}
     \begin{align}
         \max_{x_t\in[0, r_t]} & \sum_{j\in [K]} \left\{\mathcal{V}_j(\mathbf{x}) - f_j\left(\sum_{t\in [T]} x_t \cdot \boldsymbol{1}_{\{j_t = j\}} \right)\right\} \\
-        \text{s.t.} \quad     & \sum_{t\in[T]} x_t \leq 1.
+        \text{s.t.} \quad     & \sum_{t\in[T]} x_t \leq B.
     \end{align}
 \end{subequations}
 
@@ -27,7 +27,7 @@ We begin with the same assumption that there are sufficient arrivals in each gro
 
 For a given set of desired allocations $ \{m_j\}_{j\in[K]} $, we denote the total desired allocations across all groups as $ M = \sum_{j\in [K]} m_j $. We assume that the capacity $ B $ is large enough to accommodate the total desired allocations across all groups.
 \begin{assumption}[\textbf{Soft-Quota Capacity}] \label{assumption-soft-quota-capacity}
-    The total desired allocations across all groups do not exceed the overall capacity $ 1 $, i.e., $ M = \sum_{j\in [K]} m_j \leq 1 $.
+    The total desired allocations across all groups do not exceed the overall capacity $ B $, i.e., $ M = \sum_{j\in [K]} m_j \leq B $.
 \end{assumption}
 
 

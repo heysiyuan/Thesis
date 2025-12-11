@@ -59,20 +59,20 @@
 \usepackage{multicol}
 \usepackage{multirow}
 \usepackage{makecell}
-\usepackage{tablefootnote} 
+\usepackage{tablefootnote}
 \usepackage{boldline}
 
 % ---- Wrapper text and environment with background 
 \usepackage[many]{tcolorbox}
 \newenvironment{wrapperText}[1]
 {
-%	\smallskip
-	\begin{tcolorbox}[breakable, enhanced, colback=gray!20, boxrule=0pt, arc=5pt, left=0.5em, right=0.5em, top=0.5em, bottom=0.5em, 
-        before upper=\setlength{\parskip}{1em}
-        ]
-        #1}
-        {\end{tcolorbox}
-%	\smallskip
+  %	\smallskip
+  \begin{tcolorbox}[breakable, enhanced, colback=gray!20, boxrule=0pt, arc=5pt, left=0.5em, right=0.5em, top=0.5em, bottom=0.5em,
+      before upper=\setlength{\parskip}{1em}
+    ]
+    #1}
+    {\end{tcolorbox}
+  %	\smallskip
 }
 
 \tcolorboxenvironment{theorem}{
@@ -205,7 +205,7 @@
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 \newcommand{\done}{\rlap{$\square$}{\raisebox{2pt}{\large\hspace{1pt}\cmark}}%
-\hspace{-2.5pt}}
+  \hspace{-2.5pt}}
 \newcommand{\wontfix}{\rlap{$\square$}{\large\hspace{1pt}\xmark}}
 
 

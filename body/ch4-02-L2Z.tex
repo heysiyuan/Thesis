@@ -1,5 +1,3 @@
-
-
 Consider the case where the penalty function $ f_j $ for each group $ j $ is linearly decreasing before its desired allocation amount $ m_j $ and 0 afterwards. Namely, we have:
 \begin{align*}
     f_j(x) = \begin{cases}
@@ -35,18 +33,212 @@ The offline optimization problem can then be expressed as follows:
     \end{align}
 \end{subequations}.
 
-% \begin{assumption}[High Subsidy Regime]\label{assumption-linear-to-zero-high-subsidy}
-%     The penalty parameters are sufficiently large such that the minimum subsidy across all groups, when combined with the lowest possible valuation, exceeds the maximum valuation:
-%     \begin{align}
-%         1 + \min_{j \in [K]} \beta_j \geq \theta.
-%     \end{align}
-%     Equivalently, this can be expressed as $\theta - \min_{j \in [K]} \beta_j \leq 1$.
-% \end{assumption}
-
-
-This assumption ensures that even arrivals from the group with the smallest penalty parameter $\beta_j$ receive sufficient subsidy to make their effective valuation $(1 + \beta_j)$ competitive with the highest possible natural valuation $\theta$.
 
 \subsection{Sufficient Conditions}
+
+Given the penalty function, we introduce auxiliary variables $ y_j \geq 0 $ for each group $ j\in [K] $ to represent the shortfall from its desired allocation $ m_j $. Thus, we can reformulate the offline optimization problem \eqref{equation-linear2zero-soft-quota-primal} as follows:
+\begin{subequations}\label{equation-linear2zero-soft-quota-alternative-primal}
+    \begin{align}
+        \max_{x_t \geq 0, y_j \geq 0} & \sum_{i\in[K]}\left(\sum_{t\in[T]}v_t \cdot x_t \cdot \mathbf{1}_{\{j_t = j\}} - \beta_j \cdot y_j\right) \\
+        \text{s.t. }                  & y_j \geq m_j - \sum_{t\in[T]}x_t \cdot \mathbf{1}_{\{j_t = j\}}\label{linear2zero-y-constraint}           \\
+                                      & \sum_{t\in[T]} x_t \leq B \label{linear2zero-budget-constraint}
+    \end{align}
+\end{subequations}
+
+Introducing dual variables $ \eta_j \geq 0 $ for constraints \eqref{linear2zero-y-constraint} and $ \lambda \geq 0 $ for the capacity constraint \eqref{linear2zero-budget-constraint}, we can derive its corresponding dual problem:
+\begin{subequations}
+    \begin{align}
+        \min~        & (B-M)\cdot\lambda + \sum_{j\in[K]}m_j \cdot \eta_j              \\
+        \text{s.t. } & \eta_{j_t} \geq v_t, \quad \forall t\in [T]                     \\
+                     & \lambda \geq \eta_j \geq \lambda-\beta_j, \quad \forall j\in[K]
+    \end{align}
+\end{subequations}
+
+Based on the online primal dual framework, now we present an algorithm that updates the dual variables at each time step and based on the updates of the dual variables, makes the allocation decisions of the primal variables. The updates of the dual variables directly follows from the \OPT in the offline setting. From solving the offline optimization problem \eqref{equation-linear2zero-soft-quota-primal}, we observe that
+\begin{align*}
+    \OPT = (B-M)\cdot v^{\max} + \sum_{j\in[K]} m_j\cdot \max \{v^{\max}_j, v^{\max}-\beta_j\},
+\end{align*}
+where $ v^{\max}_j $ is the maximum value among all arrivals from group $ j $, and $ v^{\max} = \max_{j\in[K]} v^{\max}_j $.
+Intuitively,we need to select $ \lambda $ in a way that it updates according to $ v^{\max} $, and  $\eta_{j_t} $ according to $ \max \{v^{\max}_{j_t}, v^{\max}-\beta_{j_t}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Linear-To-Zero in Algorithm \ref{alg_LinearToZero}.
+\begin{algorithm}
+    \caption{Linear-To-Zero}
+    \label{alg_LinearToZero}
+    \begin{algorithmic}[1]
+
+        \Require $B, \theta$; $\{m_j, \beta_j, A_j\}_{j\in[K]}$ and $\alpha$
+        \State Initialize $\eta_j^0 = 1$, $z_j^0 = 0$ for all $j \in [K]$, and $\lambda^0 = 1$
+
+        \While{agent $t$ arrives}
+        \State Obtain the agent's value $ v_t $ and class $j_t$
+
+        \If{$z_{j_t}^{t-1} = 0$}
+        \State $y_{j_t} = A_{j_t}$
+        \Else
+        \State $y_{j_t} = 0$
+        \EndIf
+
+        \State $x^G_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_{j_t}} u\right)du \right\}$
+
+        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{1-M} u\right)du \right\}$
+
+        \For{each $i \in [K]\setminus\{j_t\}$}
+        \State $x^i_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t} + \beta_i} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_i} u\right)du \right\}$
+        \EndFor
+
+        \State $x_t = y_{j_t} + x^G_t + \sum_{j\in[K]} x^j_t$ \Comment{Total allocation}
+
+        \State Update $z_{j_t}^t = z_{j_t}^{t-1} + x_t$
+
+        \State Update:
+        \[
+            \eta^t_{j_t} = \max\{\eta^{t-1}_{j_t}, v_t\}, \quad
+            \lambda^t = \max\{\lambda^{t-1}, v_t\}, \quad
+            \eta^t_i = \max\{\eta^{t-1}_i, v_t - \beta_i\} \ \forall i \neq j_t
+        \]
+
+        \EndWhile
+
+    \end{algorithmic}
+\end{algorithm}
+
+In Algorithm \ref{alg_LinearToZero}, $ z_j^t $ denotes the utilization level of class $ j $ by time $ t $, and $ \beta_j^t  = \beta_j \cdot \mathbf{1}_{\{z_j^{t-1} < m_j\}} $ indicates whether the subsidy for class $ j $ is still active at time $ t $.
+
+Depending on the value $ v_t $, there are four sources of allocation for agent $ t $:
+\begin{itemize}
+    \item {\bf Initial Reservation $ y_{j_t} $:} if class $ j_t $ has not yet reached its reserved allocation amount $ A_{j_t} $, allocate $ y_{j_t} = A_{j_t} $ to agent $ t $.
+    \item {\bf Global Allocation $ x^G_t $:} allocate an additional amount $ x^G_t $ based on the global dual variable $ \lambda^{t-1} $ which is shared across all classes. $ x^G_t $ is only non-zero when the agent's value $ v_t $ exceeds the current global dual variable $ \lambda^{t-1} $, meaning $ v_t $ is the highest value seen so far.
+    \item {\bf Class-specific Allocation $ x^{j_t}_t $:} allocate an additional amount $ x^{j_t}_t $ based on the class-specific dual variable $ \eta^{t-1}_{j_t} $. This allocation is only non-zero when the agent's value $ v_t $ exceeds the current class-specific dual variable $ \eta^{t-1}_{j_t} $.
+    \item {\bf Cross-class Allocation $ x^i_t $:} For every other class $ i \in [K]\setminus\{j_t\} $, allocate an additional amount $ x^i_t $ based on the adjusted class-specific dual variable $ \eta^{t-1}_i + \beta_i $. Cross-class allocation is only non-zero when the agent's value $ v_t $ is high enough to compensate the under allocation penalty for class $ i $.
+\end{itemize}
+
+
+In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} additionally takes as input $ \{A_j\}_{\forall j\in [K]} $ as reservations for each class and $ \alpha $. In the following theorem, we provide sufficient conditions on designing $ \{A_j\}_{\forall j\in [K]} $ and $ \alpha $ such that Algorithm \ref{alg_LinearToZero} achieves the competitive ratio of $ \alpha $.
+
+\begin{theorem}\label{theorem-linear2zero-soft-gfq-upper-bound}
+    For any $ \alpha \geq \alpha^* $, Algorithm \ref{alg_LinearToZero} is $ \alpha $-competitive and produces a feasible solution, where $ \alpha^* $ is the optimal value of the following optimization problem:
+    \begin{align*}
+        \min_{\{A_j\}_{\forall j \in[K]}} & \alpha                                                                                                                                                                                                                                                                                            \\
+        \text{s.t. }                      & \sum_{j\in[K]}A_j \geq \frac{B}{\alpha}                                                                                                                                                                                                                                                           \\
+                                          & \begin{cases}A_{j} + \frac{B-M+m_{j}}{\alpha}\ln\left(\frac{v^*_{j,j}+\beta_{j}}{1+\beta_{j}}\right)=m_{j}                           \\
+                                                A_{i} + \frac{m_{i}}{\alpha}\ln\left(\frac{v^*_{i,j}+\beta_{i}}{1+\beta_{i}}\right)=m_{i}, \quad \forall i \in[K]/\{j\} \\
+                                                M+\frac{B-M+m_{j}}{\alpha}\ln\left(\frac{\theta}{v^*_{j,j}}\right)+\sum_{i \in[K]/\{j\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta}{v^*_{i,j}}\right) \leq B
+                                            \end{cases} \\
+                                          & \hspace{5.5cm} ,\forall j \in [K]
+    \end{align*}
+\end{theorem}
+
+\begin{proof}
+    The proof to Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound} follows the primal-dual analysis framework. First, we need to show that the dual variables are feasible at each step. second, we need to show that at each time step $ t $, the incremental inequality holds for the change in the primal and dual objectives. Lastly, we need to show that the obtained primal solution is feasible by showing that the total allocation does not exceed the capacity $ B $, regardless of the arrival sequence.
+
+    \paragraph{Dual Feasibility.} Based on the update rules in Algorithm \ref{alg_LinearToZero}, it is straightforward to verify that the dual variables $ \eta_j^t $ and $ \lambda^t $ satisfy the dual feasibility conditions at each time step $ t $.
+
+    \paragraph{Incremental Inequality.} Let $ \Delta P_t= P_t - P_{t-1} $ and $ \Delta D_t = D_t - D_{t-1} $ denote the changes in the primal and dual objectives at time step $ t $, respectively. First, note that the primal change at each time step $ t $ can be expressed as the sum of the value obtained and the subsidy provided:
+    \begin{align*}
+        \Delta P_t = v_t\cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t.
+    \end{align*}
+    Based on the arriving agent's value $ v_t $, we consider the following cases for the change in the dual objective:
+    \paragraph{Case 1.} If $ v_t \geq \eta^{t-1}_{j_t} $ but $ v_t < \lambda^{t-1} $, then the dual change is
+    \begin{align*}
+        \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})
+    \end{align*}
+
+
+
+
+
+
+    {\color{red}
+    In this case, there is only one active allocation source, namely the class-specific allocation, so $x_t = x_t^{j_t}$. From the specified update rule for $\eta_{j_t}^t$ we have
+    \[
+        \Delta D_t
+        = m_{j_t}(\eta^t_{j_t} - \eta^{t-1}_{j_t})
+        = m_{j_t}\bigl(\eta^{t-1}_{j_t}+\beta^t_{j_t}\bigr)
+        \left(\exp\left(\frac{\alpha}{m_{j_t}}x_t^{j_t}\right)-1\right).
+    \]
+    }
+
+    % If $x_t^{j_t} = 0$, then $x_t = 0$, which implies $\Delta P_t = 0$ and, from the expression above, $\Delta D_t = 0$. Hence $\Delta P_t \ge \Delta D_t / \alpha$ holds trivially. Therefore we only need to consider the nontrivial case $x_t^{j_t} > 0$.
+
+    % By construction of the algorithm, $x_t^{j_t}$ maximizes the corresponding one-dimensional objective. For an interior maximizer $x_t^{j_t} > 0$, the first-order optimality condition yields
+    % \[
+    %     \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}}
+    %     = \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right),
+    % \]
+    % or equivalently
+    % \[
+    %     v_t + \beta^t_{j_t}
+    %     = \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
+    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right).
+    % \]
+
+    % Since $x_t = x_t^{j_t}$ in Case~1, the primal increment can be written as
+    % \begin{align*}
+    %     \Delta P_t
+    %      & = (v_t + \beta^t_{j_t}) x_t
+    %     = (v_t + \beta^t_{j_t}) x_t^{j_t}                 \\
+    %      & = \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
+    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right)
+    %     x_t^{j_t}.
+    % \end{align*}
+    % Therefore, the desired inequality $\Delta P_t \ge \Delta D_t / \alpha$ is equivalent to
+    % \[
+    %     \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
+    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right)
+    %     x_t^{j_t}
+    %     \;\ge\;
+    %     \frac{1}{\alpha} m_{j_t}
+    %     \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
+    %     \left(\exp\!\left(\frac{\alpha}{m_{j_t}}x_t^{j_t}\right)-1\right).
+    % \]
+    % Since $\eta^{t-1}_{j_t} + \beta^t_{j_t} > 0$, we can divide both sides by this positive factor. Let
+    % \[
+    %     y := \frac{\alpha}{m_{j_t}} x_t^{j_t} \ge 0.
+    % \]
+    % The inequality reduces to
+    % \[
+    %     e^{y} \cdot \frac{m_{j_t}}{\alpha} y
+    %     \;\ge\;
+    %     \frac{m_{j_t}}{\alpha}\bigl(e^{y} - 1\bigr),
+    % \]
+    % or, after cancelling the common scalar $m_{j_t}/\alpha > 0$,
+    % \[
+    %     e^{y} y \;\ge\; e^{y} - 1.
+    % \]
+
+    % Define $g(y) := e^{y} y - e^{y} + 1 = e^{y}(y-1) + 1$. Then
+    % \[
+    %     g(0) = 0, \qquad
+    %     g'(y) = e^{y}(y-1) + e^{y} = e^{y} y \ge 0 \quad \forall\, y \ge 0.
+    % \]
+    % Hence $g$ is nondecreasing on $[0,\infty)$ and $g(y) \ge g(0) = 0$ for all $y \ge 0$, which implies
+    % \[
+    %     e^{y} y \;\ge\; e^{y} - 1 \quad \forall\, y \ge 0.
+    % \]
+    % Therefore $\Delta P_t \ge \Delta D_t / \alpha$ holds in Case~1.
+    % }
+    % \paragraph{Case 2.} If $ v_t < \eta^{t-1}_{j_t} $, then the dual variable $ \eta_{j_t} $ is updated to $ v_t $ and the allocation for group $ j_t $ is $ 0 $. Thus, we have:
+    % \begin{align*}
+    %     \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}) =  m_{j_t} \cdot (v_t - \eta^{t-1}_{j_t}) \le 0,
+    % \end{align*}
+    % and
+    % \begin{align*}
+    %     \Delta P_t = v_t \cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t \ge 0.
+    % \end{align*}
+    % Therefore, the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ holds.
+
+    % \paragraph{Case 3.} If $ v_t \geq \lambda^{t-1} $, then the dual variable $ \lambda $ is updated to $ v_t $, and the allocation is made to the group with the highest value. Without loss of generality, assume that $ j_t = 1 $ is the group with the highest value. Then, we have:
+    % \begin{align*}
+    %     \Delta D_t = (B-M) \cdot (\lambda^t - \lambda^{t-1}) + m_1 \cdot (\eta^t_1 - \eta^{t-1}_1) \ge 0,
+    % \end{align*}
+    % and
+    % \begin{align*}
+    %     \Delta P_t = v_t \cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t \ge 0.
+    % \end{align*}
+    % Therefore, the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ holds.
+
+    % \paragraph{Case 4.} If $ \eta^{t-1}_{j_t} \geq \lambda^{t-1} $, then the dual variable $ \eta_{j_t} $ is updated according to the class-specific update rule, and the allocation is made to the group with the highest value. The analysis for this case is similar to Case 3, and the inequality $ \Delta P_t \ge \Delta D_t/\alpha $ also holds.
+\end{proof}
+
 
 \subsection{Necessary Conditions}
 
