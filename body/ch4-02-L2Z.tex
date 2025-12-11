@@ -137,85 +137,41 @@ In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} addition
         \Delta P_t = v_t\cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t.
     \end{align*}
     Based on the arriving agent's value $ v_t $, we consider the following cases for the change in the dual objective:
-    \paragraph{Case 1.} If $ v_t \geq \eta^{t-1}_{j_t} $ but $ v_t < \lambda^{t-1} $, then the dual change is
+    \paragraph{Case 1.} If $ v_t \geq \eta^{t-1}_{j_t} $ but $ v_t < \lambda^{t-1} $, the only source of allocation is the class-specific allocation $ x^{j_t}_t $. The dual change can be expressed as:
     \begin{align*}
         \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})
     \end{align*}
+    By the design of $ x^{j_t}_t $ in Algorithm \ref{alg_LinearToZero} being the maximizer of the stated expression, we have the following from the first-order condition:
+    \begin{align*}
+        \exp(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t) = \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}}.
+    \end{align*}
+    Rearranging the terms gives
+    \begin{align*}
+        v_t = (\eta^{t-1}_{j_t} + \beta^t_{j_t})\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) - \beta^t_{j_t}.
+    \end{align*}
+    Given the update rule $ \eta^t_{j_t} = \max\{\eta^{t-1}_{j_t}, v_t\} = v_t $ in this case, we have
+    \begin{align*}
+        \Delta D_t & = m_{j_t}\cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t})                                                                                                     \\
+                   & = m_{j_t} \cdot \left((\eta^{t-1}_{j_t} + \beta^t_{j_t})\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) - \beta^t_{j_t} - \eta^{t-1}_{j_t}\right) \\
+                   & = m_{j_t} \cdot (\eta^{t-1}_{j_t} + \beta^t_{j_t})\left(\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) - 1\right),
+    \end{align*}
+    and similarly,
+    \begin{align*}
+        \Delta P_t & = (v_t + \beta^t_{j_t}) x^{j_t}_t                                                                 \\
+                   & = (\eta^{t-1}_{j_t} + \beta^t_{j_t})\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) x^{j_t}_t.
+    \end{align*}
+    To show $ \Delta P_t \geq \Delta D_t/\alpha $, we need to verify the following inequality:
+    \begin{align*}
+        (\eta^{t-1}_{j_t} + \beta^t_{j_t})\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) x^{j_t}_t \geq \frac{1}{\alpha} m_{j_t} \cdot (\eta^{t-1}_{j_t} + \beta^t_{j_t})\left(\exp\left(\tfrac{\alpha}{m_{j_t}} x^{j_t}_t\right) - 1\right).
+    \end{align*}
+    Given that $ \eta^{t-1}_{j_t} + \beta^t_{j_t} > 0 $, we can divide both sides by this positive factor. Furthermore, let $ y := \frac{\alpha}{m_{j_t}} x^{j_t}_t \geq 0 $, then $ x^{j_t}_t = (m_{j_t}/\alpha) y $, and the inequality to prove becomes
+    \begin{align*}
+        e^{y} \cdot \frac{m_{j_t}}{\alpha} y & \geq \frac{m_{j_t}}{\alpha} \bigl(e^{y} - 1\bigr) \\
+        e^{y} y                              & \geq e^{y} - 1
+    \end{align*}
+    Define $ g(y) := e^{y} y - e^{y} + 1 = e^{y}(y-1) + 1 $. Given that $ g(0) = 0, g'(y) = e^{y}(y-1) + e^{y} = e^{y} y \geq 0 $ for all $ y \geq 0 $, $ g $ is non-decreasing on $ [0, \infty) $ and $ g(y) \geq g(0) = 0 $ for all $ y \geq 0 $, which is equivalent to $ e^{y} y \geq e^{y} - 1 $ for all $ y \geq 0 $. Therefore, we obtain $ \Delta P_t \geq \Delta D_t/\alpha $ in Case 1.
 
 
-
-
-
-
-    {\color{red}
-    In this case, there is only one active allocation source, namely the class-specific allocation, so $x_t = x_t^{j_t}$. From the specified update rule for $\eta_{j_t}^t$ we have
-    \[
-        \Delta D_t
-        = m_{j_t}(\eta^t_{j_t} - \eta^{t-1}_{j_t})
-        = m_{j_t}\bigl(\eta^{t-1}_{j_t}+\beta^t_{j_t}\bigr)
-        \left(\exp\left(\frac{\alpha}{m_{j_t}}x_t^{j_t}\right)-1\right).
-    \]
-    }
-
-    % If $x_t^{j_t} = 0$, then $x_t = 0$, which implies $\Delta P_t = 0$ and, from the expression above, $\Delta D_t = 0$. Hence $\Delta P_t \ge \Delta D_t / \alpha$ holds trivially. Therefore we only need to consider the nontrivial case $x_t^{j_t} > 0$.
-
-    % By construction of the algorithm, $x_t^{j_t}$ maximizes the corresponding one-dimensional objective. For an interior maximizer $x_t^{j_t} > 0$, the first-order optimality condition yields
-    % \[
-    %     \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}}
-    %     = \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right),
-    % \]
-    % or equivalently
-    % \[
-    %     v_t + \beta^t_{j_t}
-    %     = \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
-    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right).
-    % \]
-
-    % Since $x_t = x_t^{j_t}$ in Case~1, the primal increment can be written as
-    % \begin{align*}
-    %     \Delta P_t
-    %      & = (v_t + \beta^t_{j_t}) x_t
-    %     = (v_t + \beta^t_{j_t}) x_t^{j_t}                 \\
-    %      & = \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
-    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right)
-    %     x_t^{j_t}.
-    % \end{align*}
-    % Therefore, the desired inequality $\Delta P_t \ge \Delta D_t / \alpha$ is equivalent to
-    % \[
-    %     \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
-    %     \exp\!\left(\frac{\alpha}{m_{j_t}} x_t^{j_t}\right)
-    %     x_t^{j_t}
-    %     \;\ge\;
-    %     \frac{1}{\alpha} m_{j_t}
-    %     \bigl(\eta^{t-1}_{j_t} + \beta^t_{j_t}\bigr)
-    %     \left(\exp\!\left(\frac{\alpha}{m_{j_t}}x_t^{j_t}\right)-1\right).
-    % \]
-    % Since $\eta^{t-1}_{j_t} + \beta^t_{j_t} > 0$, we can divide both sides by this positive factor. Let
-    % \[
-    %     y := \frac{\alpha}{m_{j_t}} x_t^{j_t} \ge 0.
-    % \]
-    % The inequality reduces to
-    % \[
-    %     e^{y} \cdot \frac{m_{j_t}}{\alpha} y
-    %     \;\ge\;
-    %     \frac{m_{j_t}}{\alpha}\bigl(e^{y} - 1\bigr),
-    % \]
-    % or, after cancelling the common scalar $m_{j_t}/\alpha > 0$,
-    % \[
-    %     e^{y} y \;\ge\; e^{y} - 1.
-    % \]
-
-    % Define $g(y) := e^{y} y - e^{y} + 1 = e^{y}(y-1) + 1$. Then
-    % \[
-    %     g(0) = 0, \qquad
-    %     g'(y) = e^{y}(y-1) + e^{y} = e^{y} y \ge 0 \quad \forall\, y \ge 0.
-    % \]
-    % Hence $g$ is nondecreasing on $[0,\infty)$ and $g(y) \ge g(0) = 0$ for all $y \ge 0$, which implies
-    % \[
-    %     e^{y} y \;\ge\; e^{y} - 1 \quad \forall\, y \ge 0.
-    % \]
-    % Therefore $\Delta P_t \ge \Delta D_t / \alpha$ holds in Case~1.
-    % }
     % \paragraph{Case 2.} If $ v_t < \eta^{t-1}_{j_t} $, then the dual variable $ \eta_{j_t} $ is updated to $ v_t $ and the allocation for group $ j_t $ is $ 0 $. Thus, we have:
     % \begin{align*}
     %     \Delta D_t = m_{j_t} \cdot (\eta^t_{j_t} - \eta^{t-1}_{j_t}) =  m_{j_t} \cdot (v_t - \eta^{t-1}_{j_t}) \le 0,
