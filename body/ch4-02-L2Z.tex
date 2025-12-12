@@ -132,6 +132,7 @@ In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} addition
 
     \paragraph{Dual Feasibility.} Based on the update rules in Algorithm \ref{alg_LinearToZero}, it is straightforward to verify that the dual variables $ \eta_j^t $ and $ \lambda^t $ satisfy the dual feasibility conditions at each time step $ t $.
 
+        {\color{red} TODO: Further consolidate the proofs by showing that it holds for any source of allocation, and then apply to different cases.}
     \paragraph{Incremental Inequality.} Let $ \Delta P_t= P_t - P_{t-1} $ and $ \Delta D_t = D_t - D_{t-1} $ denote the changes in the primal and dual objectives at time step $ t $, respectively. First, note that the primal change at each time step $ t $ can be expressed as the sum of the value obtained and the subsidy provided:
     \begin{align*}
         \Delta P_t = v_t\cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t.
@@ -218,6 +219,264 @@ In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} addition
     \end{align*}
 
 \end{proof}
+
+\paragraph{Primal Feasibility.} We now show that the allocations produced by Algorithm~\ref{alg_LinearToZero} are feasible, i.e.,
+\[
+    \sum_{t=1}^T x_t \;\le\; B
+\]
+for every realization of the arrival sequence.
+Recall that $ z_j^t $ denotes the cumulative allocation to class $ j $ up to and including time $ t $, we further define $ Z^t := \sum_{j\in[K]} z_j^t = \sum_{s=1}^t x_s $ to represent the total utilization by time $ t $. Meanwhile, the dual variables satisfy $ n^0_j = 1 $ for all classes $ j\in[K] $ and $ \lambda^0 = 1 $ at time $ t=0 $, and are updated over time as maxima of observed values. As a result, they are non-decreasing over time and in the range $[1,\theta]$.
+
+We now define a potential function to help us prove the capacity constraint. For any group $ i \in [K] $ and time $ t\ge 0 $, define
+\begin{align*}
+    \Gamma_i^t := Z^t + \sum_{j\in[K]} \frac{m_j}{\alpha} \ln\Biggl(\frac{\theta + \beta_j \mathbf 1_{\{z_j^t < m_j\}}}{\eta_j^t + \beta_j \mathbf 1_{\{z_j^t < m_j\}}}\Biggr) + \frac{B-M}{\alpha} \ln\Biggl(\frac{\theta + \beta_i \mathbf 1_{\{z_i^t < m_i\}}}{\lambda^t + \beta_i \mathbf 1_{\{z_i^t < m_i\}}}\Biggr).
+\end{align*}
+
+\emph{Step 1: Base bound at $t=0$.}
+At time $t=0$ we have $Z^0= z_j^0=0$ for all $j$, and $\eta_j^0=\lambda^0=1$. Hence, by the definition of $\Gamma_i^t$,
+\begin{align*}
+    \Gamma_i^0 = & 0 + \sum_{j\in[K]} \frac{m_j}{\alpha} \ln\Biggl(\frac{\theta + \beta_j}{1 + \beta_j}\Biggr) + \frac{B-M}{\alpha} \ln\Biggl(\frac{\theta + \beta_i}{1 + \beta_i}\Biggr)
+\end{align*}
+We show that by the choice of $\{A_j\}_{j\in[K]}$ and $\alpha$ in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}, we have $\Gamma_i^0 \le B - \sum_{j\in[K]} A_j$ for all $i\in[K]$. For each "reference" class $ l \in [K] $, the problem introduce auxiliary thresholds $ \{v^*_{k,l}\}_{k\in[K]} $ such that the following constraints hold:
+\begin{align*}
+    A_{l} + \frac{B-M+m_{l}}{\alpha}\ln\left(\frac{v^*_{l,l}+\beta_{l}}{1+\beta_{l}}\right)=m_{l}                           \\
+    A_{k} + \frac{m_{i}}{\alpha}\ln\left(\frac{v^*_{k,l}+\beta_{i}}{1+\beta_{i}}\right)=m_{i}, \quad \forall k \in[K]/\{l\} \\
+    M+\frac{B-M+m_{l}}{\alpha}\ln\left(\frac{\theta}{v^*_{l,l}}\right)+\sum_{i \in[K]/\{l\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta}{v^*_{i,l}}\right) \leq B
+\end{align*}
+
+Fix any $ i \in [K] $ and apply these constraints with reference index $ l = i $. Rearranging the equalities gives
+\begin{align}
+    \frac{B-M+m_i}{\alpha}\ln\Biggl(\frac{v^*_{i,i}+\beta_i}{1+\beta_i}\Biggr) & = m_i - A_i,\label{equation-reference-ai}                       \\[-0.2em]
+    \frac{m_j}{\alpha}\ln\Biggl(\frac{v^*_{j,i}+\beta_j}{1+\beta_j}\Biggr)     & = m_j - A_j,\quad \forall j\neq i.\label{equation-reference-aj}
+\end{align}
+Summing \eqref{equation-reference-ai} and \eqref{equation-reference-aj} over all $ j $ yields
+\begin{align}
+    M - \sum_{j \in [K]} A_j = & \frac{B-M+m_i}{\alpha}\ln\Biggl(\frac{v^*_{i,i}+\beta_i}{1+\beta_i}\Biggr)
+    + \sum_{j\neq i}\frac{m_j}{\alpha}\ln\Biggl(\frac{v^*_{j,i}+\beta_j}{1+\beta_j}\Biggr). \label{equation-reference-M-minus-A}
+\end{align}
+
+Then we have
+\begin{align}
+    \Gamma_i^0 - \sum_{j\in[K]} A_j
+     & = \Gamma_i^0 - M + M - \sum_{j\in[K]} A_j \nonumber                                           \\
+     & = \Gamma_i^0 - M - \frac{B-M+m_i}{\alpha}\ln\Biggl(\frac{v^*_{i,i}+\beta_i}{1+\beta_i}\Biggr)
+    - \sum_{j\neq i}\frac{m_j}{\alpha}\ln\Biggl(\frac{v^*_{j,i}+\beta_j}{1+\beta_j}\Biggr). \label{equation-reference-Gamma-minus-A}
+\end{align}
+
+For each $ j\in[K] $, we decompose the logarithms in $\Gamma_i^0$ as follows:
+\begin{align*}
+    \ln\Biggl(\frac{\theta+\beta_j}{1+\beta_j}\Biggr)
+     & = \ln\Biggl(\frac{\theta}{v^*_{j,i}}\Biggr)
+    + \ln\Biggl(\frac{v^*_{j,i}+\beta_j}{1+\beta_j}\Biggr)
+    + \ln\Biggl(\frac{\theta+\beta_j}{\theta}\cdot\frac{v^*_{j,i}}{v^*_{j,i}+\beta_j}\Biggr).
+\end{align*}
+
+Substituting these into the expression for $\Gamma_i^0$ and then into \eqref{equation-reference-Gamma-minus-A}, we have
+\begin{align*}
+    \Gamma_i^0 + \sum_j A_j = & M + \frac{B-M+m_i}{\alpha}\ln\Biggl(\frac{\theta}{v^*_{i,i}}\Biggr)
+    + \sum_{j\neq i}\frac{m_j}{\alpha}\ln\Biggl(\frac{\theta}{v^*_{j,i}}\Biggr) + \sum_{j\in[K]} \frac{m_j}{\alpha} \ln\Biggl(\frac{\theta+\beta_j}{\theta}\cdot\frac{v^*_{j,i}}{v^*_{j,i}+\beta_j}\Biggr) \\
+                              & \leq M + \frac{B-M+m_i}{\alpha}\ln\Biggl(\frac{\theta}{v^*_{i,i}}\Biggr)
+    + \sum_{j\neq i}\frac{m_j}{\alpha}\ln\Biggl(\frac{\theta}{v^*_{j,i}}\Biggr)                                                                                                                            \\
+                              & \leq B
+\end{align*}
+where the first inequality follows since each factor $ \dfrac{\theta+\beta_j}{\theta}\cdot\dfrac{v^*_{j,i}}{v^*_{j,i}+\beta_j} $ is at most $1$, so every logarithm in the last sum is non-positive, and the second inequality follows from the third feasibility inequality in the design problem.
+
+
+
+
+
+
+
+
+% \medskip
+% \noindent\emph{Step 2: $\Gamma_i^t$ is non-increasing in $t$.}
+% Fix $i\in[K]$ and consider a time step $t\ge 1$.
+% Define
+% \[
+%     \Delta Z_t := Z^t - Z^{t-1} = x_t,
+%     \qquad
+%     \Delta\Gamma_i^t := \Gamma_i^t - \Gamma_i^{t-1}.
+% \]
+% We claim that $\Delta\Gamma_i^t \le 0$ for all $t$, i.e.,
+% $\Gamma_i^t$ is non-increasing over time.
+
+% By Algorithm~\ref{alg_LinearToZero},
+% the total allocation to the arrival at time $t$ decomposes as
+% \[
+%     x_t = y_{j_t} + x_t^{G} + \sum_{j\in[K]} x_t^j,
+% \]
+% where $y_{j_t}$ is the initial reservation (possibly zero), $x_t^G$ is the global allocation, and $x_t^j$ are the class-specific and cross-class allocations.
+
+% The only terms in $\Gamma_i^t$ that can change at time $t$ are:
+% \begin{itemize}
+%     \item the utilization term $Z^t$, which increases by $x_t$;
+%     \item the logarithmic term associated with class $j_t$, through the update of $\eta_{j_t}$ and of the indicator $\mathbf 1_{\{z_{j_t}^t < m_{j_t}\}}$;
+%     \item the logarithmic term associated with index $i$ in the last summand, through the update of $\lambda$ and possibly of the indicator $\mathbf 1_{\{z_i^t<m_i\}}$ when $i=j_t$.
+% \end{itemize}
+% All other class-specific logarithmic terms remain unchanged at step~$t$.
+
+% Using the first-order optimality conditions already derived in the “Incremental Inequality” part of the proof, we obtain for each active component:
+% \begin{itemize}
+%     \item If $x_t^{G} > 0$, then
+%           \[
+%               \exp\Bigl(\tfrac{\alpha}{B-M} x_t^{G}\Bigr)
+%               = \frac{v_t + \beta_{j_t}^t}{\lambda^{t-1} + \beta_{j_t}^t},
+%           \]
+%           which implies
+%           \[
+%               x_t^{G}
+%               + \frac{B-M}{\alpha}
+%               \ln\Biggl(
+%               \frac{\lambda^{t} + \beta_i \mathbf 1_{\{z_i^t<m_i\}}}
+%               {\lambda^{t-1} + \beta_i \mathbf 1_{\{z_i^{t-1}<m_i\}}}
+%               \Biggr)
+%               = 0.
+%           \]
+%     \item If $x_t^{j_t} > 0$, then
+%           \[
+%               \exp\Bigl(\tfrac{\alpha}{m_{j_t}} x_t^{j_t}\Bigr)
+%               = \frac{v_t + \beta_{j_t}^t}{\eta_{j_t}^{t-1} + \beta_{j_t}^t},
+%           \]
+%           and similarly
+%           \[
+%               x_t^{j_t}
+%               + \frac{m_{j_t}}{\alpha}
+%               \ln\Biggl(
+%               \frac{\eta_{j_t}^{t} + \beta_{j_t} \mathbf 1_{\{z_{j_t}^t<m_{j_t}\}}}
+%               {\eta_{j_t}^{t-1} + \beta_{j_t} \mathbf 1_{\{z_{j_t}^{t-1}<m_{j_t}\}}}
+%               \Biggr)
+%               = 0.
+%           \]
+%     \item For each cross-class term $x_t^j>0$ with $j\neq j_t$, the first-order condition
+%           \[
+%               \exp\Bigl(\tfrac{\alpha}{m_j} x_t^j\Bigr)
+%               = \frac{v_t + \beta_{j_t}^t}{\eta_{j_t}^{t-1} + \beta_{j_t}^t + \beta_j}
+%           \]
+%           yields
+%           \[
+%               x_t^{j}
+%               + \frac{m_j}{\alpha}
+%               \ln\Biggl(
+%               \frac{\eta_{j}^{t} + \beta_j \mathbf 1_{\{z_j^t<m_j\}}}
+%               {\eta_{j}^{t-1} + \beta_j \mathbf 1_{\{z_j^{t-1}<m_j\}}}
+%               \Biggr)
+%               = 0,
+%           \]
+%           since the dual update for class $j$ is precisely
+%           $\eta_j^t = \max\{\eta_j^{t-1}, v_t - \beta_j\}$.
+% \end{itemize}
+% Thus, each active primal increment $x_t^G$, $x_t^{j_t}$, or $x_t^j$ is exactly offset by the decrease in the corresponding logarithmic term appearing in $\Gamma_i^t$. If a particular component is inactive at time $t$ (the corresponding $x_t^\cdot = 0$), the associated log term does not increase; hence its contribution to $\Delta\Gamma_i^t$ is non-positive.
+
+% The reservation component $y_{j_t}$ is only used once per class and is upper-bounded by $A_{j_t}$. Reserving $A_{j_t}$ units simply reduces the “free” part of the capacity from $B$ to $B-\sum_{j}A_j$ and is already accounted for in the base inequality \eqref{eq:base-B}. Therefore, putting all components together we obtain
+% \[
+%     \Delta\Gamma_i^t \;\le\; 0
+%     \quad\text{for every }t\ge 1,\ \text{and every }i\in[K].
+% \]
+% Hence, for all $t$ and $i$,
+% \begin{equation}
+%     \Gamma_i^t \;\le\; \Gamma_i^0.
+%     \label{eq:Gamma-monotone}
+% \end{equation}
+
+% \medskip
+% \noindent\emph{Step 3: Concluding the capacity bound.}
+% By definition \eqref{eq:Gamma-def}, all logarithmic terms in $\Gamma_i^t$ are non-negative: indeed,
+% $\eta_j^t \le \theta + \beta_j$ and
+% $\lambda^t \le \theta + \beta_i$ for all $t$,
+% so each ratio inside a logarithm is at least 1. Thus
+% \[
+%     Z^t \;\le\; \Gamma_i^t
+%     \quad\text{for all }t\text{ and all }i\in[K].
+% \]
+% Combining this with \eqref{eq:Gamma-monotone} and the base inequality \eqref{eq:base-B} yields
+% \[
+%     Z^t
+%     \;\le\; \Gamma_i^t
+%     \;\le\; \Gamma_i^0
+%     \;\le\; B - \sum_{j\in[K]} A_j
+%     \quad\text{for all } t.
+% \]
+% Adding back the (at most) $\sum_{j\in[K]}A_j$ units of initial reservations gives
+% \[
+%     \sum_{s=1}^t x_s = Z^t + \sum_{j\in[K]} (\text{reservation to class }j)
+%     \;\le\; B
+%     \quad\text{for every }t.
+% \]
+% Since this holds for every finite horizon $t$, we conclude that the total allocation produced by Algorithm~\ref{alg_LinearToZero} never exceeds the capacity $B$, irrespective of the arrival sequence and for any number of classes $K$.
+
+% This proves primal feasibility.
+
+% In this step, we need to show that the primal solutions are feasible. Specifically, for any trajectory of arrivals, the total allocation must never exceed the capacity $B$. We prove this by induction. To show that any arrival sequence always yields a feasible solution, it suffices to argue that if, at each step, the allocation is chosen so that it remains feasible under the worst-case future sequence, then the algorithm’s allocation will always be feasible. In other words, we prove that if the utilization level before time $t$, $Z^{t-1} = \sum_{j \in [K]} z^{t-1}_j$, is future-feasible, then—regardless of the valuation and class identity of the arrival at time $t$, the updated utilization $Z^{t-1} + x^t$ is also future-feasible.
+
+%     In the base case, we have $z^0_j = 0$ for all $j \in [K]$. Additionally, based on the algorithm design, we know that regardless of the valuations of each class, there is an allocation of $A_j$ assigned for the arrivals of those classes. As a result, in this case, we have:
+%     \begin{align*}
+%         \sum_{j\in[K]} A_j + \frac{m_j}{\alpha}\ln\left(\frac{\theta+\beta_{j}\cdot \mathbf{1}\{z_j^{t}<m_j\}}{1+\beta_{j}\cdot \mathbf{1}\{z_j^{t}<m_j\}}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta+\beta_{i}\cdot \mathbf{1}\{z_i^{t}<m_i\}}{1+\beta_{i}\cdot \mathbf{1}\{z_i^{t}<m_i\}}\right) \leq B, \qquad \forall i \in[K].
+%     \end{align*}
+%     It is easy to verify that this is indeed exactly similar as the constraint \eqref{} form Theorem \ref{}.
+%     Now, in the induction hypothesis, let us assume 
+%     \begin{align*}
+%         Z^{t-1}+ \sum_{j\in[K]}\frac{m_j}{\alpha}\ln\left(\frac{\theta+\beta_{j}\cdot \mathbf{1}\{z_j^{t-1}<m_j\}}{\eta^{t-1}_j+\beta_{j}\cdot \mathbf{1}\{z_j^{t-1}<m_j\}}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta+\beta_{i}\cdot \mathbf{1}\{z_i^{t-1}<m_i\}}{\eta^{t-1}_i+\beta_{i}\cdot \mathbf{1}\{z_i^{t-1}<m_i\}}\right) \leq B, \qquad \forall i \in[K],
+%     \end{align*}
+%     Then we want to show that 
+%     \begin{align*}
+%         Z^{t-1}+ x_t+\sum_{j\in[K]}\frac{m_j}{\alpha}\ln\left(\frac{\theta+\beta_{j}\cdot \mathbf{1}\{z_j^{t}<m_j\}}{\eta^{t}_j+\beta_{j}\cdot \mathbf{1}\{z_j^{t}<m_j\}}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta+\beta_{i}\cdot \mathbf{1}\{z_i^{t}<m_i\}}{\eta^{t}_i+\beta_{i}\cdot \mathbf{1}\{z_i^{t}<m_i\}}\right) \leq B, \qquad \forall i \in[K].
+%     \end{align*}
+%     Here, we star with the simple case where there are only 2 classes ($K=2$), and then we explain how our proof can be generalized for any number of classes. Without loss of generality, we can assume that the arrival at time $t$ is form the first class. Based on the status of $z^{t-1}_j\leq m_j$ for all $j\in[K]$, there are different cases which we will explore all of them. 
+%     \begin{description}
+%         \item[Case 1: $z^{t-1}_1 \geq m_1$ and $z^{t-1}_2 \geq m_2$:] Let us assume $\eta^{t-1}\geq v_t$. Then, in this case, based on the algorithm \ref{}, $x_t = \frac{m_1}{\alpha}\ln(\frac{v_t}{\eta_1^{t-1}})$ and $\eta^t_1 = v_t$. As a result, we can see that:
+%         \begin{align*}
+%              &Z^{t-1}+ x_t + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{v_t}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{\lambda^{t}}\right) + \frac{m_2}{\alpha}\ln\left(\frac{\theta}{\eta^{t}_2}\right) \\
+%              =&Z^{t-1}+ \frac{m_1}{\alpha}\ln\left(\frac{\theta} {\eta^{t-1}_1}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{\lambda^{t-1}}\right) + \frac{m_2}{\alpha}\ln\left(\frac{\theta}{\eta^{t-1}_2}\right)\leq B, \qquad \forall i \in[K]
+%         \end{align*}
+%         Here, the first equality, is based on the allocation of the algorithm and the inequality is based on the induction hypothesis. Furthermore, in the case that $\lambda^{t-1}< v_t$, it is again easy to verify that the the inequality holds. 
+
+%         \item[Case 2: $z^{t-1}_1 < m_1$ and $z^{t-1}_2 < m_2$:] In this let us again first assume that $\lambda^{t-1} \geq v_t$. As a result, similar to the previous case, $x_t = \frac{m_1}{\alpha}\ln(\frac{v_t+\beta}{\eta^{t-1}_1+\beta})$. Therefore, we need to show that 
+%         \begin{align*}
+%             Z^{t-1}+ x_t &+ \frac{m_1}{\alpha}\ln\left(\frac{p_1 + \beta}{v_t+\beta}\right) + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{p_1}\right) + \frac{m_2}{\alpha}\ln\left(\frac{p_2 + \beta}{\eta^{t-1}_2+\beta}\right) + \frac{m_2}{\alpha}\ln\left(\frac{\theta}{p_2}\right) \\&+  \frac{B-M}{\alpha}\ln\left(\frac{p_1 + \beta}{\lambda^{t-1}+\beta}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{p_1}\right) \leq B
+%         \end{align*}
+%         where $p_1$ and $p_2$ are such that $z^{t-1}_1 + x_t + \frac{m_1}{\alpha} \ln(\frac{p_1 + \beta}{v_t + \beta}) + \frac{B-M}{\alpha}\ln(\frac{p_1 + \beta}{\lambda^{t-1}+\beta}) = m_1$ and $z^{t-1}_2 + \frac{m_2}{\alpha} \ln(\frac{p_2 + \beta}{\eta^{t-1}_2 + \beta}) = m_2$ Based on the the allocation at this case, we can see that this is again directly followed by the induction hypothesis. In addition, we need to prove that 
+%         \begin{align*}
+%             Z^{t-1}+ x_t &+ \frac{m_1}{\alpha}\ln\left(\frac{q_1 + \beta}{v_t+\beta}\right) + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{p_1}\right) + \frac{m_2}{\alpha}\ln\left(\frac{q_2 + \beta}{\eta^{t-1}_2+\beta}\right) + \frac{m_2}{\alpha}\ln\left(\frac{\theta}{q_2}\right) \\&+  \frac{B-M}{\alpha}\ln\left(\frac{q_2 + \beta}{\lambda^{t-1}+\beta}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{q_2}\right) \leq B
+%         \end{align*}
+%         where $q_1$ and $q_2$ are such that $z^{t-1}_1 + x_t + \frac{m_1}{\alpha} \ln(\frac{q_1 + \beta}{v_t + \beta}) = m_1$ and $z^{t-1}_2 + \frac{m_2}{\alpha} \ln(\frac{q_2 + \beta}{\eta^{t-1}_2 + \beta})  + \frac{B-M}{\alpha}\ln(\frac{q_2 + \beta}{\lambda^{t-1}+\beta})= m_2$. As a result, we have
+%         \begin{align}
+%             Z^{t-1} + \frac{m_1}{\alpha}\ln\left(\frac{q_1+\beta}{\eta^{t-1}_1+\beta}\right)+\frac{m_2}{\alpha}\ln\left(\frac{q_2+\beta}{\eta^{t-1}_2+\beta}\right) + \frac{B-M}{\alpha}\ln\left(\frac{q_2+\beta}{\lambda^{t-1}+\beta}\right) = M,
+%         \end{align}
+%         Therefor, it remains to show that and the final utilization level under Algorithm \ref{alg_new_design} 
+%         \begin{align}
+%             M + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{q_1}\right)+\frac{m_2}{\alpha}\ln\left(\frac{\theta}{q_2}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{q_2}\right) \label{eq:final_utilization} \leq B
+%         \end{align}
+%         Based on the induction hypothesis recall that, 
+%         \begin{align*}
+%             &Z^{t-1} + \frac{m_1}{\alpha}\ln\left(\frac{v_1+\beta}{\eta^{t-1}_1+\beta}\right)+\frac{m_2}{\alpha}\ln\left(\frac{v_2+\beta}{\eta^{t-1}_2+\beta}\right) + \frac{B-M}{\alpha}\ln\left(\frac{v_1+\beta}{\lambda^{t-1}+\beta}\right) = M\\
+%             &M + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{v_1}\right)+\frac{m_2}{\alpha}\ln\left(\frac{\theta}{v_2}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{v_1}\right) \leq B\\
+%             &Z^{t-1} + \frac{m_1}{\alpha}\ln\left(\frac{r_1+\beta}{\eta^{t-1}_1+\beta}\right)+\frac{m_2}{\alpha}\ln\left(\frac{r_2+\beta}{\eta^{t-1}_2+\beta}\right) + \frac{B-M}{\alpha}\ln\left(\frac{r_2+\beta}{\lambda^{t-1}+\beta}\right) = M\\
+%             &M + \frac{m_1}{\alpha}\ln\left(\frac{\theta}{r_1}\right)+\frac{m_2}{\alpha}\ln\left(\frac{\theta}{r_2}\right) + \frac{B-M}{\alpha}\ln\left(\frac{\theta}{r_2}\right) \leq B
+%         \end{align*}
+%         As a result, we have
+%         \begin{align*}
+%             &m_1\ln\left(\frac{v_1+\beta}{q_1+\beta}\right)+m_2\ln\left(\frac{v_2+\beta}{q_2+\beta}\right) + (B-M)\ln\left(\frac{v_1+\beta}{q_2+\beta}\right) = 0\\
+%             &m_1\ln\left(\frac{r_1+\beta}{q_1+\beta}\right)+m_2\ln\left(\frac{r_2+\beta}{q_2+\beta}\right) + (B-M)\ln\left(\frac{r_2+\beta}{q_2+\beta}\right) = 0
+%         \end{align*}
+%         Therefore, if we can show that at least one of the following inequalities hold, it completes the proof.
+%         \begin{align*}
+%             &m_1\ln\left(\frac{v_1}{q_1}\right)+m_2\ln\left(\frac{v_2}{q_2}\right) + (B-M)\ln\left(\frac{v_1}{q_2}\right) \leq 0\\
+%             &m_1\ln\left(\frac{r_1}{q_1}\right)+m_2\ln\left(\frac{r_2}{q_2}\right) + (B-M)\ln\left(\frac{r_2}{q_2}\right) \leq 0
+%         \end{align*}
+%         Let $F(x) = m_1\ln\left(\frac{v_1+x}{q_1+x}\right)+m_2\ln\left(\frac{v_2+x}{q_2+x}\right) + (B-M)\ln\left(\frac{v_1+x}{q_2+x}\right)$. If we can show that $F'(x) \geq 0$ for all $x\in[0,\beta]$, we can conclude that $F(0)\leq F(\beta)=0$. Therefore, 
+%         \begin{align*}
+%             F'(x)= m_1\frac{q_1-v_1}{(q_1+x)(v_1+x)}+m_2\frac{q_2-v_2}{(q_2+x)(v_2+x)} + (B-M)\frac{q_2-v_1}{(q_2+x)(v_1+x)}. 
+%         \end{align*}
+%         Since $F''(x)\leq 0$, it is only need to show that $F'(\beta)\geq 0$. Based on the well-known inequality of $1+x \geq \ln(x)$, we know that:
+%         \begin{align*}
+%             m_1\frac{q_1-v_1}{v_1+x}+m_2\frac{q_2-v_2}{v_2+x} + (B-M)\frac{q_2-v_1}{v_1+x}\geq 0. 
+%         \end{align*}
+%         Since, $v_1 \leq q_1$, if $q_1 \leq q_2$, we can conclude that $F'(\beta) \geq 0$. However, if $q_1 \geq q_2$, we again can conclude $G'(\beta)\geq 0$ where $G(x) = m_1\ln\left(\frac{r_1+x}{q_1+x}\right)+m_2\ln\left(\frac{r_2+x}{q_2+x}\right) + (B-M)\ln\left(\frac{r_2+x}{q_2+x}\right)$. As a result, at least one of $F(0)$ or $G(0)$ is less than 0 which finishes the proof.
+
+%         \textbf{The other cases are similar to this one.}
+%     \end{description}
+%     Now, we argue that the case with higher number of classes is essentially similar to the 2 class case. The reason 
+%     \end{description}
 
 
 \subsection{Necessary Conditions}
