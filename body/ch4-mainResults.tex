@@ -1,0 +1,169 @@
+In this section, we present our main results for the soft-quota setting by providing upper and lower bounds for linear-to-zero, zero-to-linear, and linear-to-linear penalty functions.
+
+\subsection{Sufficient Conditions}
+
+\subsubsection{Linear-to-Zero Penalties.}
+
+
+Given the penalty function, we introduce auxiliary variables $ y_j \geq 0 $ for each group $ j\in [K] $ to represent the shortfall from its desired allocation $ m_j $. Thus, we can reformulate the offline optimization problem \eqref{equation-linear2zero-soft-quota-primal} as follows:
+\begin{subequations}\label{equation-linear2zero-soft-quota-alternative-primal}
+    \begin{align}
+        \max_{x_t \geq 0, y_j \geq 0} & \sum_{i\in[K]}\left(\sum_{t\in[T]}v_t \cdot x_t \cdot \mathbf{1}_{\{j_t = j\}} - \beta_j \cdot y_j\right) \\
+        \text{s.t. }                  & y_j \geq m_j - \sum_{t\in[T]}x_t \cdot \mathbf{1}_{\{j_t = j\}}\label{linear2zero-y-constraint}           \\
+                                      & \sum_{t\in[T]} x_t \leq B \label{linear2zero-budget-constraint}
+    \end{align}
+\end{subequations}
+
+Introducing dual variables $ \eta_j \geq 0 $ for constraints \eqref{linear2zero-y-constraint} and $ \lambda \geq 0 $ for the capacity constraint \eqref{linear2zero-budget-constraint}, we can derive its corresponding dual problem:
+\begin{subequations}
+    \begin{align}
+        \min~        & (B-M)\cdot\lambda + \sum_{j\in[K]}m_j \cdot \eta_j              \\
+        \text{s.t. } & \eta_{j_t} \geq v_t, \quad \forall t\in [T]                     \\
+                     & \lambda \geq \eta_j \geq \lambda-\beta_j, \quad \forall j\in[K]
+    \end{align}
+\end{subequations}
+
+Based on the online primal dual framework, now we present an algorithm that updates the dual variables at each time step and based on the updates of the dual variables, makes the allocation decisions of the primal variables. The updates of the dual variables directly follows from the \OPT in the offline setting. From solving the offline optimization problem \eqref{equation-linear2zero-soft-quota-primal}, we observe that
+\begin{align*}
+    \OPT = (B-M)\cdot v^{\max} + \sum_{j\in[K]} m_j\cdot \max \{v^{\max}_j, v^{\max}-\beta_j\},
+\end{align*}
+where $ v^{\max}_j $ is the maximum value among all arrivals from group $ j $, and $ v^{\max} = \max_{j\in[K]} v^{\max}_j $.
+Intuitively,we need to select $ \lambda $ in a way that it updates according to $ v^{\max} $, and  $\eta_{j_t} $ according to $ \max \{v^{\max}_{j_t}, v^{\max}-\beta_{j_t}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Linear-To-Zero in Algorithm \ref{alg_LinearToZero}.
+\begin{algorithm}
+    \caption{Linear-To-Zero}
+    \label{alg_LinearToZero}
+    \begin{algorithmic}[1]
+
+        \Require $B, \theta$; $\{m_j, \beta_j, A_j\}_{j\in[K]}$ and $\alpha$
+        \State Initialize $\eta_j^0 = 1$, $z_j^0 = 0$ for all $j \in [K]$, and $\lambda^0 = 1$
+
+        \While{agent $t$ arrives}
+        \State Obtain the agent's value $ v_t $ and class $j_t$
+
+        \If{$z_{j_t}^{t-1} = 0$}
+        \State $y_{j_t} = A_{j_t}$
+        \Else
+        \State $y_{j_t} = 0$
+        \EndIf
+
+        \State $x^G_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\lambda^{t-1} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{B-M} u\right)du \right\}$
+
+        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_{j_t}} u\right)du \right\}$
+
+        \For{each $i \in [K]\setminus\{j_t\}$}
+        \State $x^i_t = \argmax_a \left\{ \frac{v_t + \beta^t_{j_t}}{\eta^{t-1}_{j_t} + \beta^t_{j_t} + \beta_i} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_i} u\right)du \right\}$
+        \EndFor
+
+        \State $x_t = y_{j_t} + x^G_t + \sum_{j\in[K]} x^j_t$ \Comment{Total allocation}
+
+        \State Update $z_{j_t}^t = z_{j_t}^{t-1} + x_t$
+
+        \State Update:
+        \[
+            \eta^t_{j_t} = \max\{\eta^{t-1}_{j_t}, v_t\}, \quad
+            \lambda^t = \max\{\lambda^{t-1}, v_t\}, \quad
+            \eta^t_i = \max\{\eta^{t-1}_i, v_t - \beta_i\} \ \forall i \neq j_t
+        \]
+
+        \EndWhile
+
+    \end{algorithmic}
+\end{algorithm}
+
+In Algorithm \ref{alg_LinearToZero}, $ z_j^t $ denotes the utilization level of class $ j $ by time $ t $, and $ \beta_j^t  = \beta_j \cdot \mathbf{1}_{\{z_j^{t-1} < m_j\}} $ indicates whether the subsidy for class $ j $ is still active at time $ t $.
+
+Depending on the value $ v_t $, there are four sources of allocation for agent $ t $:
+\begin{itemize}
+    \item {\bf Initial Reservation $ y_{j_t} $:} if class $ j_t $ has not yet reached its reserved allocation amount $ A_{j_t} $, allocate $ y_{j_t} = A_{j_t} $ to agent $ t $.
+    \item {\bf Global Allocation $ x^G_t $:} allocate an additional amount $ x^G_t $ based on the global dual variable $ \lambda^{t-1} $ which is shared across all classes. $ x^G_t $ is only non-zero when the agent's value $ v_t $ exceeds the current global dual variable $ \lambda^{t-1} $, meaning $ v_t $ is the highest value seen so far.
+    \item {\bf Class-specific Allocation $ x^{j_t}_t $:} allocate an additional amount $ x^{j_t}_t $ based on the class-specific dual variable $ \eta^{t-1}_{j_t} $. This allocation is only non-zero when the agent's value $ v_t $ exceeds the current class-specific dual variable $ \eta^{t-1}_{j_t} $.
+    \item {\bf Cross-class Allocation $ x^i_t $:} For every other class $ i \in [K]\setminus\{j_t\} $, allocate an additional amount $ x^i_t $ based on the adjusted class-specific dual variable $ \eta^{t-1}_i + \beta_i $. Cross-class allocation is only non-zero when the agent's value $ v_t $ is high enough to compensate the under allocation penalty for class $ i $.
+\end{itemize}
+
+
+In addition to the problem parameters, Algorithm \ref{alg_LinearToZero} additionally takes as input $ \{A_j\}_{\forall j\in [K]} $ as reservations for each class and $ \alpha $. In the following theorem, we provide sufficient conditions on designing $ \{A_j\}_{\forall j\in [K]} $ and $ \alpha $ such that Algorithm \ref{alg_LinearToZero} achieves the competitive ratio of $ \alpha $.
+
+\begin{theorem}\label{theorem-linear2zero-soft-gfq-upper-bound}
+    For any $ \alpha \geq \alpha^* $, Algorithm \ref{alg_LinearToZero} is $ \alpha $-competitive and produces a feasible solution, where $ \alpha^* $ is the optimal value of the following optimization problem:
+    \begin{align*}
+        \min_{\{A_j\}_{\forall j \in[K]}} & \alpha                                                                                                                                                                                                                                                                                          \\
+        \text{s.t. }                      & \sum_{j\in[K]}A_j \geq \frac{B}{\alpha}                                                                                                                                                                                                                                                         \\
+                                          & \begin{cases}A_{j} + \frac{B-M+m_{j}}{\alpha}\ln\left(\frac{v^*_{j,j}+\beta_{j}}{1+\beta_{j}}\right)=m_{j}                           \\
+                                                A_{i} + \frac{m_{i}}{\alpha}\ln\left(\frac{v^*_{i,j}+\beta_{i}}{1+\beta_{i}}\right)=m_{i}, \quad \forall i \in[K]/\{j\} \\
+                                                M+\frac{B-M+m_{j}}{\alpha}\ln\left(\frac{\theta}{v^*_{j,j}}\right)+\sum_{i \in[K]/\{j\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta}{v^*_{i,j}}\right) \leq B
+                                            \end{cases} \\
+                                          & \hspace{5.5cm} ,\forall j \in [K]
+    \end{align*}
+\end{theorem}
+
+
+\subsubsection{Zero-to-Linear Penalties.}
+\subsubsection{Linear-to-Linear Penalties.}
+
+
+
+\subsection{Necessary Conditions}
+
+We consider a \textit{Semi-Adaptive} adversary that chooses the hard instance based on the initial reservation for each group. Intuitively, in any of the three types of penalty functions, it is easier to allocate to a group $ j $ before its desired allocation $ m_j $ than after reaching $ m_j $, since there is either a subsidy before reaching $ m_j $ or a penalty after exceeding $ m_j $. Therefore, the adversary challenges the algorithm by pressuring a particular group $ j $ to reach its desired allocation $ m_j$ as early as possible.
+
+\begin{definition}[Hard Instance Family]\label{definition-hard-instance-soft-quota}
+    We construct a family of hard instances, denoted by $ \{I^{\SOFTQUOTA}_j\}_{\forall j\in [K]} $, with each $ I^{\SOFTQUOTA}_j $ consisting of four distinct stages of arrivals. In the first stage, agents from all classes arrive simultaneously, each with a valuation of $ 1 $. In the second stage, agents from a specific class $ j \in [K] $ arrive with valuations forming a continuum from $ 1+\varepsilon $ to $ 1+\beta-\varepsilon $. In the third stage, agents from all classes other than $ j $ begin to arrive. Their valuations increase at the same rate as the arrivals from class $ j $. Specifically, as the valuation of class $ j $ arrivals increases from $ 1+\beta $ to $ \theta $, the valuations of arrivals from all other classes $ i \neq j $ increase from $ 1+\varepsilon $ to $ \theta-\beta+\varepsilon $. Finally, in the fourth stage, arrivals from all classes $ i \neq j $ continue to arrive with valuations increasing from $ \theta-\beta+2\varepsilon $ to $ \theta $. The structure of this hard instance is illustrated as follows:
+    \[
+        \resizebox{\textwidth}{!}{%
+            $\begin{array}{c|c|c|c}
+                    (1, j)  & (1+\varepsilon,j), \ldots, (1+\beta - \varepsilon, j) & (1+\beta, j), \ldots, (\theta, j)                                &                                                          \\
+                    (1,1)
+                            &                                                       & (1+\varepsilon, 1), \dots, (\theta - \beta + \varepsilon, 1)     & (\theta -\beta +2\varepsilon, 1), \ldots (\theta, 1)     \\
+                    \vdots  &                                                       & \vdots                                                           & \vdots                                                   \\
+                    (1,j-1) &                                                       & (1+\varepsilon, j-1), \dots, (\theta - \beta + \varepsilon, j-1) & (\theta -\beta +2\varepsilon, j-1), \ldots (\theta, j-1) \\
+                    (1,j+1) &                                                       & (1+\varepsilon, j+1), \dots, (\theta - \beta + \varepsilon, j+1) & (\theta -\beta +2\varepsilon, j+1), \ldots (\theta, j+1) \\
+                    \vdots  &                                                       & \vdots                                                           & \vdots                                                   \\[5pt]
+                    (1, K)  &                                                       & (1+\varepsilon, K), \dots, (\theta - \beta + \varepsilon, K)     & (\theta -\beta +2\varepsilon, K), \ldots (\theta, K)
+                \end{array}$%
+        }
+    \]
+    where a pair $(v,j)$ is corresponding to the arrival from class $j$ with value $v$.
+\end{definition}
+
+One key observation is that the first stage remains identical across all instances $I^{\SOFTQUOTA}_j$ for any $j \in [K]$. Consequently, any optimal online algorithm must make allocation decisions that are robust against the adversarial choice of arrival order in subsequent stages.
+
+Based on the above hard instance family, we now present necessary conditions for all three types of penalty functions.
+
+\subsubsection{Linear-to-Zero Penalties.}
+\begin{theorem}[Necessary Conditions for Linear-to-Zero Penalties]\label{theorem-linear2zero-soft-quota-necessary}
+    If there exists an $ \alpha $-competitive online algorithm under the arrival instance $I^{\SOFTQUOTA}_j$ for all $j\in[K]$, there must exist a utilization function $ \psi_i(u): [1, \theta] \to [0, b_i] $ for each class $i\in[K]$ that satisfies the following conditions for each group $ j \in [K] $:
+    \begin{subequations}\label{equation-linear2zero-necessary-conditions}
+        \begin{gather}
+            \sum_{i\in [K]} \Psi_i(1) \geq \frac{1}{\alpha}\left((B-M+m_{j})v_{j} + \sum_{i\in[K]\setminus\{j\}} m_{i}\right), \label{equation-linear2zero-necessary-initial-condition} \\[1em]
+            \Psi_{j}(v)+\sum_{i\in[K]\setminus\{j\}} \Psi_{i}(1) \geq \frac{1}{\alpha} \left((B-M+m_{j})v+\sum_{i\in[K]\setminus\{j\}} m_i\right),    \label{equation-linear2zero-necessary-first-group-condition}                                    \\
+            \hfill \forall v \in [v_j, \theta], \notag                                                                                                                                          \\[1em]
+            \begin{aligned}
+                \Psi_j (\theta) + \sum_{l=1}^{i-1} \Psi_{l}(\theta) + \Psi_{i}(v) +\sum_{l=i+1}^K \Psi_{l}(1) &                                                                                                      \\
+                \geq \frac{1}{\alpha} \bigg((B-M+m_j\sum_{l=1}^{i-1}m_{l})\theta                              & + m_{i}\cdot v+\sum_{l=i+1}^K m_{l}\bigg),  \label{equation-linear2zero-necessary-general-condition}
+            \end{aligned}                                    \\
+            \hfill \forall v\in[1,\theta], \forall i\in[K]\setminus\{j\}, \notag                                                                                                                \\[1em]
+            \sum_{i\in [K]}\psi_i (\theta) \leq B, \label{equation-linear2zero-necessary-boundary-condition}
+        \end{gather}
+    \end{subequations}
+    where $\Psi_j(v) = \psi_j(1)+\int_1^vud\psi_j(u) - f_j(\psi_j(v))$ and $M=\sum_{j\in[K]}m_j$.
+\end{theorem}
+
+From Theorem \ref{theorem-linear2zero-soft-quota-necessary}, we can observe that the initial reservations $ \psi^\pi_j(1) $ for each group $ j $ and the group identity $ j $ in $ I^{\SOFTQUOTA}_j $ play a key role. To obtain the lower bound on the competitive ratio $ \alpha $, we need to solve an optimization problem that satisfies the necessary conditions for all $ j \in [K] $. Below, we provide a case study for the case of two groups with equal penalty parameters $ \beta_1 = \beta_2 = \beta $.
+
+\begin{corollary}
+    [Lower Bound for Two Groups with Linear-to-Zero Penalties]\label{theorem-linear2zero-soft-quota-lower-bound-two-groups}
+    For $ K = 2 $ groups with linear-to-zero penalty functions and equal penalty parameters $ \beta_1 = \beta_2 = \beta $, under the family of hard instances $ I^{\SOFTQUOTA}_{j\in [2]} $, no online algorithm can achieve a competitive ratio better than $ \alpha^* $, where $ \alpha^* $ is the optimal value of the following optimization problem:
+    \begin{subequations}\label{equation-linear2zero-two-groups-optimization}
+        \begin{align}
+            \min \quad        & \alpha                                                                                                                                                        \label{equation-linear2zero-two-groups-objective}   \\[0.5em]
+            \text{s.t.} \quad & \frac{1-M+m_{\pi_1}}{\alpha}\ln\left(\frac{v^*_{\pi_1} +\beta}{v_{\pi}+\beta}\right) + \psi_{\pi_1}(1) = m_{\pi_1},                                           \label{equation-linear2zero-two-groups-constraint1} \\[0.3em]
+                              & \frac{m_{\pi_2}}{\alpha}\ln\left(\frac{v^*_{\pi_2} +\beta}{1+\beta}\right) + \psi_{\pi_2}(1) = m_{\pi_2},                                                     \label{equation-linear2zero-two-groups-constraint2} \\[0.3em]
+                              & 1 \geq m_1 + m_2 + \frac{1-M+m_{\pi_1}}{\alpha}\ln\left(\frac{\theta}{v^*_{\pi_1}}\right)+\frac{m_{\pi_2}}{\alpha}\ln\left(\frac{\theta}{v^*_{\pi_2}}\right), \label{equation-linear2zero-two-groups-constraint3} \\[0.3em]
+                              & \sum_{j\in[2]}\left[\psi_{\pi_j}(1)-\beta(m_{\pi_j} - \psi_{\pi_j}(1))^+\right] \geq \frac{1}{\alpha}\left((1-M+m_{\pi_1})v_\pi + m_{\pi_2}\right), \label{equation-linear2zero-two-groups-constraint4}
+        \end{align}
+    \end{subequations}  for all permutations $ \pi \in \{(1,2), (2,1)\} $.
+\end{corollary}
+
+
+\subsubsection{Zero-to-Linear Penalties.}
+\subsubsection{Linear-to-Linear Penalties.}

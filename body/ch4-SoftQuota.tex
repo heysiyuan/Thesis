@@ -36,15 +36,59 @@ For a given set of desired allocations $ \{m_j\}_{j\in[K]} $, we denote the tota
 \end{assumption}
 
 
-\section{Zero-to-Linear Penalties}
+In this section, we focus on three types of penalty functions: linear-to-zero, zero-to-linear, and linear-to-linear functions.
 
-\input{body/ch4-01-Z2L.tex}
+\paragraph{Linear-to-zero functions.} Consider the case where the penalty function $ f_j $ for each group $ j $ is linearly decreasing before its desired allocation amount $ m_j $ and 0 afterwards. Namely, we have:
+\begin{align*}
+    f_j(x) = \begin{cases}
+                 f_j^L(x) = -\beta_j x + \beta_j m_j, x\in [0, m_j], \\
+                 f_j^R(x) = 0, x\in [m_j, \infty),
+             \end{cases}
+\end{align*}
 
-\section{Linear-to-Zero Penalties}
+The offline optimization problem can then be expressed as follows:
+\begin{subequations}\label{equation-linear2zero-soft-quota-primal}
+    \begin{align}
+        \max_{0 \leq x_t \leq r_t}\quad
+         & \sum_{t \in [T]} v_tx_t -
+        \sum_{j \in [K]}
+        \beta_j
+        \Bigl[\,m_j - \sum_{t=1}^{T} x_t \cdot\mathbf 1_{\{j_t = j\}}\Bigr]^{+} \\[6pt]
+        \text{s.t.}\quad
+         & \sum_{t=1}^{T} x_t \leq 1
+    \end{align}
+\end{subequations}
 
-\input{body/ch4-02-L2Z.tex}
+\paragraph{Remark} We may take an alternative view of the optimization problem by considering it as a subsidy of $ \beta_j $ for the first $ m_j $ units of allocation to group $ j $. In this case, the optimization problem can be reformulated as follows,
+\begin{subequations}\label{equation-linear2zero-subsidy}
+    \begin{align}
+        \max_{0 \leq x_t \leq r_t}\quad
+         & \sum_{t \in [T]} (v_t + \beta_{j_t}) x_t -
+        \sum_{j \in [K]}
+        \beta_j
+        \Bigl[\sum_{t \in [T]} x_t \cdot \mathbf{1}_{\{j_t = j\}} - m_j\Bigr]^{+} \\[6pt]
+        \text{s.t.}\quad
+         & \sum_{t=1}^{T} x_t \leq 1
+    \end{align}
+\end{subequations}.
 
 
-\section{Linear-to-Linear Penalties}
+\section{Main Results}\label{section-main-results-soft-quota}
+\input{body/ch4-mainResults.tex}
 
-\input{body/ch4-03-L2L.tex}
+
+\section{Proof Outline}
+\input{body/ch4-proofOutline.tex}
+
+% \section{Zero-to-Linear Penalties}
+
+% \input{body/ch4-01-Z2L.tex}
+
+% \section{Linear-to-Zero Penalties}
+
+% \input{body/ch4-02-L2Z.tex}
+
+
+% \section{Linear-to-Linear Penalties}
+
+% \input{body/ch4-03-L2L.tex}
