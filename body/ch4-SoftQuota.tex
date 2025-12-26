@@ -38,7 +38,7 @@ For a given set of desired allocations $ \{m_j\}_{j\in[K]} $, we denote the tota
 
 In this section, we focus on three types of penalty functions: linear-to-zero, zero-to-linear, and linear-to-linear functions.
 
-\paragraph{Linear-to-zero functions.} Consider the case where the penalty function $ f_j $ for each group $ j $ is linearly decreasing before its desired allocation amount $ m_j $ and 0 afterwards. Namely, we have:
+\paragraph{Linear-to-zero Penalties.} Consider the case where the penalty function $ f_j $ for each group $ j $ is linearly decreasing before its desired allocation amount $ m_j $ and 0 afterwards. Namely, we have:
 \begin{align*}
     f_j(x) = \begin{cases}
                  f_j^L(x) = -\beta_j x + \beta_j m_j, x\in [0, m_j], \\
@@ -55,7 +55,7 @@ The offline optimization problem can then be expressed as follows:
         \beta_j
         \Bigl[\,m_j - \sum_{t=1}^{T} x_t \cdot\mathbf 1_{\{j_t = j\}}\Bigr]^{+} \\[6pt]
         \text{s.t.}\quad
-         & \sum_{t=1}^{T} x_t \leq 1
+         & \sum_{t=1}^{T} x_t \leq B
     \end{align}
 \end{subequations}
 
@@ -68,9 +68,40 @@ The offline optimization problem can then be expressed as follows:
         \beta_j
         \Bigl[\sum_{t \in [T]} x_t \cdot \mathbf{1}_{\{j_t = j\}} - m_j\Bigr]^{+} \\[6pt]
         \text{s.t.}\quad
-         & \sum_{t=1}^{T} x_t \leq 1
+         & \sum_{t=1}^{T} x_t \leq B
     \end{align}
 \end{subequations}.
+
+\paragraph{Zero-to-linear Penalties.}We also consider the case where the penalty function $ f_j $ for each group $ j $ is 0 before its desired allocation amount $ m_j $ and linearly increasing afterwards. Namely, we have:
+\begin{align*}
+    f_j(x) = \begin{cases}
+                 f_j^L(x) = 0, x\in [0, m_j], \\
+                 f_j^R(x) = \bar {\beta}_jx - \bar{\beta}_j m_j, x\in [m_j, \infty),
+             \end{cases}
+\end{align*}
+
+The offline optimization problem can then be expressed as follows:
+\begin{subequations}\label{equation-zero2linear-soft-quota-primal}
+    \begin{align}
+        \max_{0 \leq x_t \leq r_t}\quad
+         & \sum_{t \in [T]} v_tx_t -
+        \sum_{j \in [K]}
+        \bar{\beta}_j
+        \Bigl[\sum_{t=1}^{T} x_t \cdot\mathbf 1_{\{j_t = j\}} - m_j\Bigr]^{+} \\[6pt]
+        \text{s.t.}\quad
+         & \sum_{t=1}^{T} x_t \leq B
+    \end{align}
+\end{subequations}
+In this case, it is straightforward to see that the penalty term can be interpreted as a direct cost for exceeding the desired allocation amount $ m_j $ for each group $ j $.
+
+In this case, we impose an additional assumption on the penalty parameters to ensure that the it is always beneficial to allocate more by guaranteeing that the marginal value is always greater than the marginal penalty.
+
+\begin{assumption}[\textbf{Zero-to-Linear Penalty High Value}]
+    \label{assumption-zero2linear-high-value}
+    For each group $ j \in [K] $, its penalty parameter $ \bar{\beta}_j $ satisfies $ \bar{\beta}_j \in [0,1] $.
+\end{assumption}
+
+Without loss of generality, we assume $ \bar \beta_1 \leq \bar \beta_2 \leq \ldots \leq \bar \beta_K $.
 
 
 \section{Main Results}\label{section-main-results-soft-quota}

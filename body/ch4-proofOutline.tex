@@ -15,7 +15,7 @@ As an example, we provide the full proof for Theorem \ref{theorem-linear2zero-so
 
     \paragraph{Dual Feasibility.} Based on the update rules in Algorithm \ref{alg_LinearToZero}, it is straightforward to verify that the dual variables $ \eta_j^t $ and $ \lambda^t $ satisfy the dual feasibility conditions at each time step $ t $.
 
-        {\color{red} TODO: Further consolidate the proofs by showing that it holds for any source of allocation, and then apply to different cases.}
+
     \paragraph{Incremental Inequality.} Let $ \Delta P_t= P_t - P_{t-1} $ and $ \Delta D_t = D_t - D_{t-1} $ denote the changes in the primal and dual objectives at time step $ t $, respectively. First, note that the primal change at each time step $ t $ can be expressed as the sum of the value obtained and the subsidy provided:
     \begin{align*}
         \Delta P_t = v_t\cdot x_t + \beta^t_{j_t} \cdot x_t = (v_t + \beta^t_{j_t}) \cdot x_t.
