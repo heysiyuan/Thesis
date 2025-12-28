@@ -94,7 +94,7 @@
     \end{align*}
 
     \paragraph{Primal Feasibility.}
-    We prove that the primal solution production by Algorithm \ref{alg_LinearToZero} is feasible, i.e., $ \sum_{t=1}^T x_t \le B $, for any arrival sequence. We use induction on time $ t $ and the idea of \emph{future feasibility}. An allocation prefix is future-feasible if, even under the worst-case future sequence of arrivals, the total allocation remain within the budget $ B $.
+    We prove that the primal solution produced by Algorithm \ref{alg_LinearToZero} is feasible, i.e., $ \sum_{t=1}^T x_t \le B $, for any arrival sequence. We use induction on time $ t $ and the idea of \emph{future feasibility}. An allocation prefix is future-feasible if, even under the worst-case future sequence of arrivals, the total allocation remains within the budget $ B $.
 
     \textbf{Intuition.} To formalize this, we define a max-potential allocation function $ \Gamma_i^t $ that represents the total amount of resources allocated up to time $ t $, plus the maximum potential future allocation allowed by the current state of the dual variable. If we can show that $ \Gamma_i^t \leq B $ for all $ t $ and all $ i \in [K] $, then it implies that the total allocation $ Z^t = \sum_{s=1}^t x_s \leq B $ for all $ t $, establishing primal feasibility.
 
@@ -104,7 +104,7 @@
     % \]
 
     \[
-        \Gamma_i^t(\eta_j^t, \lambda^t) = Z_t + \sum_{j\in[K]} \Delta(\eta_j^t) + \bar{\Delta}(\lambda^t),
+        \Gamma_i^t(\eta_j^t, \lambda^t) = Z^t + \sum_{j\in[K]} \Delta(\eta_j^t) + \bar{\Delta}(\lambda^t),
     \]
     where $ \Delta(\eta_j^t) $ and $ \bar{\Delta}(\lambda^t) $ are defined as follows:
     \[
@@ -123,12 +123,16 @@
 
     We will show by induction that $ \Gamma_i^t \leq B $ for all $ t $ and all $ i \in [K] $.
 
-    \textbf{Base Case $ (t = 0) $.} At $ t = 0 $, we have $ Z^0 = Z_j^0 = 0 $ for all $ j\in [K]$, and the algorithm initializes $ \eta_j^0 = 1 $ for all $ j $ and $ \lambda^0 = 1 $. Thus, for any fixed $ i \in [K] $,
-    \[
-        \Gamma_i^0 = \sum_{j\in[K]} \frac{m_j}{\alpha}\ln\Bigl(\tfrac{\theta+\beta_j}{1+\beta_j}\Bigr)
-        + \frac{B-M}{\alpha}\ln\Bigl(\tfrac{\theta+\beta_i}{1+\beta_i}\Bigr).
-    \]
-    From the design of Algorithm \ref{alg_LinearToZero}, there is a reservation $ A_j $ for each class $ j\in [K] $, therefore, to show that the prefix at time $ t = 0 $ is future-feasible, we show that $ \Gamma_i^0 + \sum_{j\in[K]} A_j \leq B $ for all $ i \in [K] $.
+
+    \textbf{Base Case $ (t = 0) $.} At $ t = 0 $, we have $ Z^0 = Z_j^0 = 0 $ for all $ j\in [K]$, and the algorithm initializes $ \eta_j^0 = 1 $ for all $ j $ and $ \lambda^0 = 1 $. Fix any $ i\in[K] $ and recall that the thresholds $\{v^*_{k,i}\}_{k\in[K]}$ are given by Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}. By the definition of $\Gamma_i^t$ (and using $Z^0=0$),
+    \begin{align*}
+        \Gamma_i^0
+         & = \sum_{j\in[K]} \Delta(\eta_j^0) + \bar{\Delta}(\lambda^0)                                                                                                 \\
+         & = \sum_{j\ne i}\Bigl(\frac{m_j}{\alpha}\ln\Bigl(\tfrac{v^*_{j,i}+\beta_j}{1+\beta_j}\Bigr)+\frac{m_j}{\alpha}\ln\Bigl(\tfrac{\theta}{v^*_{j,i}}\Bigr)\Bigr)
+        + \Bigl(\frac{B-M+m_i}{\alpha}\ln\Bigl(\tfrac{v^*_{i,i}+\beta_i}{1+\beta_i}\Bigr)+\frac{B-M+m_i}{\alpha}\ln\Bigl(\tfrac{\theta}{v^*_{i,i}}\Bigr)\Bigr).
+    \end{align*}
+
+    From the design of Algorithm \ref{alg_LinearToZero}, there is a reservation $ A_j $ for each class $ j\in [K] $. Therefore, to show that the prefix at time $ t = 0 $ is future-feasible, it suffices to show that $ \Gamma_i^0 + \sum_{j\in[K]} A_j \leq B $ for all $ i \in [K] $.
 
     By the constraints in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}, for each "reference" class $ \ell \in [K] $ there exist thresholds $ \{v^*_{k,\ell}\}_{k\in[K]} $ such that
     \begin{align*}
@@ -137,17 +141,17 @@
         M+\frac{B-M+m_{\ell}}{\alpha}\ln\Bigl(\tfrac{\theta}{v^*_{\ell,\ell}}\Bigr)+\sum_{k \in[K]\setminus\{\ell\}}\frac{m_{k}}{\alpha}\ln\Bigl(\tfrac{\theta}{v^*_{k,\ell}}\Bigr) & \leq B.
     \end{align*}
 
-    Fixing any $ i \in [K] $ and taking $ \ell = i $, we rearrange the first two constraints and sum over $ k $ to obtain
+    Fixing $ i \in [K] $ and taking $ \ell = i $, the first two constraints imply
     \[
-        M - \sum_{j\in[K]} A_j = \frac{B-M+m_i}{\alpha}\ln\Bigl(\tfrac{v^*_{i,i}+\beta_i}{1+\beta_i}\Bigr) + \sum_{j\ne i} \frac{m_j}{\alpha}\ln\Bigl(\tfrac{v^*_{j,i}+\beta_j}{1+\beta_j}\Bigr).
+        \sum_{j\in[K]} A_j
+        + \frac{B-M+m_i}{\alpha}\ln\Bigl(\tfrac{v^*_{i,i}+\beta_i}{1+\beta_i}\Bigr)
+        + \sum_{j\ne i} \frac{m_j}{\alpha}\ln\Bigl(\tfrac{v^*_{j,i}+\beta_j}{1+\beta_j}\Bigr)
+        = \sum_{j\in[K]} m_j = M.
     \]
-    Decomposing the log terms as
-    \[
-        \ln\Bigl(\tfrac{\theta+\beta_j}{1+\beta_j}\Bigr) = \ln\Bigl(\tfrac{\theta}{v^*_{j,i}}\Bigr) + \ln\Bigl(\tfrac{v^*_{j,i}+\beta_j}{1+\beta_j}\Bigr) + \ln\Bigl(\tfrac{\theta+\beta_j}{\theta}\cdot\tfrac{v^*_{j,i}}{v^*_{j,i}+\beta_j}\Bigr),
-    \] we note that $ \frac{\theta+\beta_j}{\theta}\cdot\frac{v^*_{j,i}}{v^*_{j,i}+\beta_j} \leq 1 $, so each such logarithm is nonpositive. Substituting these decompositions into $ \Gamma_i^0 $ and combining with the last feasibility inequality in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}, we obtain
+    Substituting this identity into the expression for $\Gamma_i^0+\sum_{j\in[K]}A_j$ and then applying the last inequality in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound} yields
     \[
         \Gamma_i^0 + \sum_{j\in[K]} A_j \le B.
-    \].
+    \]
 
     \textbf{Induction Step.} Assume $ \Gamma_i^{t-1} \leq B $ for all $ i \in [K] $ at time $ t-1 $. We show that $ \Gamma_i^{t} \leq B $ for all $ i $ at time $ t $, regardless of the valuation $ v_t $ and class $ j_t $ of the arrival at time $ t $. For clarity and ease of exposition, we present the induction step for $ K = 2 $ classes first, and then argue how to extend it to general $ K \geq 2 $ classes. Without loss of generality, let $ j_t = 1 $. We then consider the following cases.
 
@@ -380,7 +384,23 @@
         \Delta P_t \ge \frac{1}{\alpha}\Bigl((B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}) + \sum_{i\in I_t} m_i(\bar\eta_i^t-\bar\eta_i^{t-1})\Bigr)=\frac{1}{\alpha}\Delta D_t.
     \end{align*}
 
-    \paragraph{Primal Feasibility.}
+    \paragraph{Primal Feasibility.} We will prove primal feasibility by the same idea of future feasibility as in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound} to show the total allocation never exceeds $ B $. The argument is similar to that in Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}, and thus omitted here for brevity. The corresponding max-potential allocation expressions are given by
+    \[
+        \Gamma_i^t(\bar\eta_j^t, \bar\lambda^t) = Z^t + \sum_{j\in[K]} \Delta(\bar\eta_j^t) + \bar{\Delta}(\bar\lambda^t),
+    \]
+    where $ \Delta(\bar\eta_j^t) $ and $ \bar{\Delta}(\bar\lambda^t) $ are defined as follows:
+    \[
+        \Delta(\bar\eta_j^t) = \begin{cases}
+            \frac{m_j}{\alpha} \ln\Bigl(\frac{v^*_{j,i}}{\bar\eta_j^t}\Bigr) + \frac{m_j}{\alpha} \ln\Bigl(\frac{\theta-\bar\beta_j}{v^*_{j,i}-\bar\beta_j}\Bigr) & \text{if } \bar\eta_j^t < v^*_{j,i},    \\
+            \frac{m_j}{\alpha} \ln\Bigl(\frac{\theta-\bar\beta_j}{\bar\eta_j^t-\bar\beta_j}\Bigr),                                                                & \text{if } \bar\eta_j^t \geq v^*_{j,i},
+        \end{cases}
+    \]
+    \[
+        \bar{\Delta}(\bar\lambda^t) = \begin{cases}
+            \frac{B-M}{\alpha} \ln\Bigl(\frac{v^*_{i,i}}{\bar\lambda^t}\Bigr) + \frac{B-M}{\alpha} \ln\Bigl(\frac{\theta-\bar\beta_i}{v^*_{i,i}-\bar\beta_i}\Bigr) & \text{if } \bar\lambda^t < v^*_{i,i},    \\
+            \frac{B-M}{\alpha} \ln\Bigl(\frac{\theta-\bar\beta_i}{\bar\lambda^t-\bar\beta_i}\Bigr),                                                                & \text{if } \bar\lambda^t \geq v^*_{i,i}.
+        \end{cases}
+    \]
 \end{proof}
 
 \section{Proof of Theorem \ref{theorem-linear2linear-soft-gfq-upper-bound}}
@@ -500,27 +520,26 @@
         \Delta P_t \ge \frac{1}{\alpha}\Bigl((B-M)(\lambda^t-\lambda^{t-1}) + m_{j_t}(\tilde\eta_{j_t}^t-\tilde\eta_{j_t}^{t-1}) + \sum_{i\in I_t} m_i(\tilde\eta_i^t-\tilde\eta_i^{t-1})\Bigr)=\frac{1}{\alpha}\Delta D_t.
     \end{align*}
 
-    \paragraph{Primal Feasibility.} We again employ the future feasibility method to show that the total allocation does not exceed $B$. The argument is similar to that in the full proof of Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}. The correspond max-potential allocation expressions in this case are defined as follows:
-    For each reference class $\ell\in[K]$, define
+    \paragraph{Primal Feasibility.} We again employ the future feasibility method to show that the total allocation does not exceed $B$. The argument is similar to that in the full proof of Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}. The corresponding max-potential allocation expressions in this case are defined below.
+    For each reference class $i\in[K]$, define
     \[
-        \Gamma_{\ell}^t := Z^t + \sum_{j\in[K]} \Delta_{j,\ell}(\tilde\eta_j^t) + \bar\Delta_{\ell}(\lambda^t),
+        \Gamma_i^t(\tilde\eta_j^t, \lambda^t) = Z^t + \sum_{j\in[K]} \Delta(\tilde\eta_j^t) + \bar{\Delta}(\lambda^t),
     \]
-    where
+    where $ \Delta(\tilde\eta_j^t) $ and $ \bar{\Delta}(\lambda^t) $ are defined as follows:
     \[
-        \Delta_{j,\ell}(u) := \begin{cases}
-            \frac{m_j}{\alpha}\ln\Bigl(\frac{v^*_{j,\ell}+\beta_j}{u+\beta_j}\Bigr) + \frac{m_j}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_j}{v^*_{j,\ell}-\bar\beta_j}\Bigr), & \text{if } u< v^*_{j,\ell},   \\
-            \frac{m_j}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_j}{u-\bar\beta_j}\Bigr),                                                                                      & \text{if } u\ge v^*_{j,\ell},
+        \Delta(\tilde\eta_j^t) = \begin{cases}
+            \frac{m_j}{\alpha}\ln\Bigl(\frac{v^*_{j,i}+\beta_j}{\tilde\eta_j^t+\beta_j}\Bigr) + \frac{m_j}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_j}{v^*_{j,i}-\bar\beta_j}\Bigr) & \text{if } \tilde\eta_j^t < v^*_{j,i},   \\
+            \frac{m_j}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_j}{\tilde\eta_j^t-\bar\beta_j}\Bigr),                                                                               & \text{if } \tilde\eta_j^t \ge v^*_{j,i},
         \end{cases}
     \]
-    and
     \[
-        \bar\Delta_{\ell}(u) := \begin{cases}
-            \frac{B-M}{\alpha}\ln\Bigl(\frac{v^*_{\ell,\ell}+\beta_{\ell}}{u+\bar\beta_{\ell}}\Bigr) + \frac{B-M}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_{\ell}}{v^*_{\ell,\ell}-\bar\beta_{\ell}}\Bigr), & \text{if } u< v^*_{\ell,\ell},   \\
-            \frac{B-M}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_{\ell}}{u}\Bigr),                                                                                                                           & \text{if } u\ge v^*_{\ell,\ell}.
+        \bar{\Delta}(\lambda^t) = \begin{cases}
+            \frac{B-M}{\alpha}\ln\Bigl(\frac{v^*_{i,i}+\beta_{i}}{\lambda^t+\bar\beta_{i}}\Bigr) + \frac{B-M}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_{i}}{v^*_{i,i}-\bar\beta_{i}}\Bigr) & \text{if } \lambda^t < v^*_{i,i},   \\
+            \frac{B-M}{\alpha}\ln\Bigl(\frac{\theta-\bar\beta_{i}}{\lambda^t}\Bigr),                                                                                                     & \text{if } \lambda^t \ge v^*_{i,i}.
         \end{cases}
     \]
-    First, by the constraints in Theorem \ref{theorem-linear2linear-soft-gfq-upper-bound}, for each reference class $\ell$ there exist thresholds $\{v^*_{j,\ell}\}_{j\in[K]}$ such that the base case satisfies $\Gamma_{\ell}^0 + \sum_{j\in[K]} A_j \le B$. This is ensured by the last condition in the theorem, which bounds the total allocation including reservations and future dual-driven allocations.
-    The induction step follows by analyzing the update cases of Algorithm \ref{alg_LinearToLinear}: whenever $\lambda$ or some $\tilde\eta_j$ increases, the corresponding allocation components $x_t^G$, $x_t^{j_t}$, and $x_t^i$ are chosen so that the decrease in $\bar\Delta_{\ell}$ and in the relevant $\Delta_{j,\ell}$ terms offsets the increase in $Z^t$ exactly (via the same logarithmic identities used in the induction step of Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}). Therefore, $\Gamma_{\ell}^t$ is non-increasing in $t$, and hence $\Gamma_{\ell}^t\le B$ for all $t$. In particular, $Z^t\le \Gamma_{\ell}^t\le B$ for all $t$, proving primal feasibility.
+    % First, by the constraints in Theorem \ref{theorem-linear2linear-soft-gfq-upper-bound}, for each reference class $\ell$ there exist thresholds $\{v^*_{j,\ell}\}_{j\in[K]}$ such that the base case satisfies $\Gamma_{\ell}^0 + \sum_{j\in[K]} A_j \le B$. This is ensured by the last condition in the theorem, which bounds the total allocation including reservations and future dual-driven allocations.
+    % The induction step follows by analyzing the update cases of Algorithm \ref{alg_LinearToLinear}: whenever $\lambda$ or some $\tilde\eta_j$ increases, the corresponding allocation components $x_t^G$, $x_t^{j_t}$, and $x_t^i$ are chosen so that the decrease in $\bar\Delta_{\ell}$ and in the relevant $\Delta_{j,\ell}$ terms offsets the increase in $Z^t$ exactly (via the same logarithmic identities used in the induction step of Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}). Therefore, $\Gamma_{\ell}^t$ is non-increasing in $t$, and hence $\Gamma_{\ell}^t\le B$ for all $t$. In particular, $Z^t\le \Gamma_{\ell}^t\le B$ for all $t$, proving primal feasibility.
 \end{proof}
 
 
