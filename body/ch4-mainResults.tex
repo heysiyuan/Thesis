@@ -321,7 +321,7 @@ Based on the above hard instance family, we now present necessary conditions for
             \sum_{i\in [K]}\psi_i (\theta) \leq B, \label{equation-linear2zero-necessary-boundary-condition}
         \end{gather}
     \end{subequations}
-    where $\Psi_j(v) = \psi_j(1)+\int_1^vud\psi_j(u) - f_j(\psi_j(v))$ and $M=\sum_{j\in[K]}m_j$.
+    where $\Psi_j(v) = \psi_j(1)+\int_1^vud\psi_j(u) - f_j(\psi_j(v))$, $ f_j(x) = \beta_j(m_j - x)^+ $.
 \end{theorem}
 
 From Theorem \ref{theorem-linear2zero-soft-quota-necessary}, we can observe that the initial reservations $ \psi^\pi_j(1) $ for each group $ j $ and the group identity $ j $ in $ I^{\SOFTQUOTA}_j $ play a key role. To obtain the lower bound on the competitive ratio $ \alpha $, we need to solve an optimization problem that satisfies the necessary conditions for all $ j \in [K] $. Below, we provide a case study for the case of two groups with equal penalty parameters $ \beta_1 = \beta_2 = \beta $.
@@ -358,9 +358,26 @@ From Theorem \ref{theorem-linear2zero-soft-quota-necessary}, we can observe that
             \sum_{i\in [K]}\bar{\psi}_i (\theta) \leq B, \label{equation-zero2linear-necessary-boundary-condition}
         \end{gather}
     \end{subequations}
-    where $\bar{\Psi}_i(v) = \bar{\psi}_i(1)+\int_1^v u\,d\bar{\psi}_i(u) - f_i(\bar{\psi}_i(v))$, $f_i(x)=\bar{\beta}_i(x-m_i)^+$, and $M=\sum_{j\in[K]}m_j$.
-
+    where $\bar{\Psi}_j(v) = \bar{\psi}_j(1)+\int_1^v u\,d\bar{\psi}_j(u) - f_j(\bar{\psi}_j(v))$, $f_j(x)=\bar{\beta}_j(x-m_j)^+$.
 \end{theorem}
 
 
 \subsubsection{Linear-to-Linear Penalties.}
+
+\begin{theorem}[Necessary Conditions for Linear-to-Linear Penalties]\label{theorem-linear2linear-soft-quota-necessary}
+    If there exists an $ \alpha $-competitive online algorithm under the arrival instance $ I^{\SOFTQUOTA}_j $ for all $ j\in [K] $, there must exist a utilization function $ \tilde{\psi}_i(u): [1, \theta] \to [0, B] $ for each class $ i\in[K] $ that satisfies the following conditions for each group $ j \in [K] $:
+    \begin{subequations}\label{equation-linear2linear-necessary-conditions}
+        \begin{gather}
+            \sum_{i\in [K]} \tilde{\Psi}_i(1) \geq \frac{1}{\alpha}\left((B-M)(v_{j}-\bar{\beta}_{j}) + m_j\cdot v_j + \sum_{i\in[K]\setminus\{j\}} m_{i}\right), \label{equation-linear2linear-necessary-initial-condition} \\[1em]
+            \tilde{\Psi}_{j}(v)+\sum_{i\in[K]\setminus\{j\}} \tilde{\Psi}_{i}(1) \geq \frac{1}{\alpha} \left((B-M)(v-\bar{\beta}_{j}) + m_j\cdot v +\sum_{i\in[K]\setminus\{j\}} m_i\right), \label{equation-linear2linear-necessary-first-group-condition} \\
+            \hfill \forall v \in [v_j, \theta], \notag \\[1em]
+            \begin{aligned}
+                \tilde{\Psi}_j (\theta) + \sum_{l=1}^{i-1} \tilde{\Psi}_{l}(\theta) + \tilde{\Psi}_{i}(v) +\sum_{l=i+1}^K \tilde{\Psi}_{l}(1) &                                                                                                        \\
+                \geq \frac{1}{\alpha} \bigg((B-M)(\theta-\bar{\beta}_j) + \bigl(m_j+\sum_{l=1}^{i-1}m_{l}\bigr)\theta                         & + m_{i}\cdot v+\sum_{l=i+1}^K m_{l}\bigg),  \label{equation-linear2linear-necessary-general-condition}
+            \end{aligned} \\
+            \hfill \forall v\in[1,\theta], \forall i\in[K]\setminus\{j\}, \notag \\[1em]
+            \sum_{i\in [K]}\tilde{\psi}_i (\theta) \leq B, \label{equation-linear2linear-necessary-boundary-condition}
+        \end{gather}
+    \end{subequations}
+    where $\tilde{\Psi}_j(v) = \tilde{\psi}_j(1)+\int_1^v u\,d\tilde{\psi}_j(u) - f_j(\tilde{\psi}_j(v))$, $f_j(x)=\beta_j(m_j-x)^+ + \bar{\beta}_j(x-m_j)^+$.
+\end{theorem}
