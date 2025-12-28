@@ -186,6 +186,97 @@ Once again, we have design parameters $ \{\bar{A}_j\}_{\forall j\in [K]} $ and $
     \end{align*}
 \end{theorem}
 
+\subsubsection{Linear-to-Linear Penalties.}
+As this case combines the previous two cases, we can similarly introduce auxiliary variables $ y_j \geq 0 $ and $ \bar{y}_j \geq 0 $ for each group $ j\in [K] $ to represent the shortfall and over-allocation beyond its desired allocation $ m_j $, respectively. Thus, we can reformulate the offline optimization problem \eqref{equation-linear2linear-soft-quota-primal} as follows:
+\begin{subequations}\label{equation-linear2linear-soft-quota-alternative-primal}
+    \begin{align}
+        \max_{x_t \geq 0} & \sum_{j\in[K]}\left(\sum_{t\in[T]}v_t \cdot x_t \cdot \mathbf{1}_{\{j_t = j\}} -\beta_j\cdot y_j- \bar\beta_j \cdot \bar{y}_j\right) \\
+        \text{s.t. }      & y_j \geq m_j - \sum_{t\in[T]}x_t \cdot \mathbf{1}_{\{j_t = j\}}                                                                      \\
+                          & \bar{y}_j \geq \sum_{t\in[T]}x_t \cdot \mathbf{1}_{\{j_t = j\}} - m_j                                                                \\
+                          & \sum_{t\in[T]} x_t \leq B
+    \end{align}
+\end{subequations}
+
+To derive the dual problem, we introduce dual variables $ \eta_j \geq 0 $ for constraints on $ y_j $, $ \bar{\eta}_j \geq 0 $ for constraints on $ \bar{y}_j $, and $ \lambda \geq 0 $ for the capacity constraint. additionally, we define $\tilde\eta_j := \lambda + \bar\eta_j - \eta_j$ for each $j\in[K]$, and thus $\tilde\eta_{j_t}$ denotes the dual variable corresponding to the arriving group $j_t$ at time $t$. With these definitions, we can derive its corresponding dual problem:
+
+\begin{subequations}\label{equation-linear2linear-soft-quota-dual}
+    \begin{align}
+        \min~        & (B-M)\cdot\lambda + \sum_{j\in[K]}m_j \cdot \tilde\eta_j                            \\
+        \text{s.t. } & \tilde\eta_{j_t} \geq v_t, \quad \forall t\in[T]                                    \\
+                     & \lambda + \bar\beta_j \geq \tilde\eta_j \geq \lambda-\beta_j, \quad \forall j\in[K]
+    \end{align}
+\end{subequations}
+
+
+Given the dual formulation, we can again characterize the offline optimum in terms of group-wise maxima. With $ v^{\max}_j $ denoting the maximum value among all arrivals from group $ j $, we define $ v^{\max}_{\bar\beta} := \max_{j\in[K]}\{v^{\max}_j-\bar\beta_j\} $ to be the maximum value adjusted by the over-allocation penalty across all groups. In this case, the $ \OPT $ can be expressed as follows:
+\begin{align*}
+    \OPT = (B-M)\cdot v^{\max}_{\bar\beta} + \sum_{j\in[K]} m_j\cdot \max\left\{v^{\max}_j,\, v^{\max}_{\bar\beta}-\beta_j\right\}.
+\end{align*}
+
+We will similarly design an online algorithm that updates the dual variables at each time step to track the behavior of the offline optimum. We will set $ \lambda $ according to $ v^{\max}_{\bar\beta} $ and $ \tilde\eta_{j_t} $ according to $ \max\{v^{\max}_{j_t},\, v^{\max}_{\bar\beta}-\beta_{j_t}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Linear-To-Linear in Algorithm \ref{alg_LinearToLinear}. Again, we use  $\bar\beta^{\min}=\min_{j\in[K]}\bar\beta_j$ in the initialization of $\lambda^0$, and $\beta^t_{j_t} = \beta_{j_t}\cdot \mathbf{1}_{\{z_{j_t}^{t-1} < m_{j_t}\}}$ and $\bar\beta^t_{j_t} = \bar\beta_{j_t}\cdot \mathbf{1}_{\{z_{j_t}^{t-1} > m_{j_t}\}}$ to indicate whether the subsidy or penalty for class $ j_t $ is active at time $ t $.
+
+\begin{algorithm}
+    \caption{Linear-To-Linear}
+    \label{alg_LinearToLinear}
+    \begin{algorithmic}[1]
+        \Require $B, \theta$; $\{m_j, \beta_j, \bar\beta_j, A_j\}_{j\in[K]}$ and $\alpha$
+        \State Initialize $\tilde\eta_j^0 = 1$, $z_j^0 = 0$ for all $j\in[K]$, and $\lambda^0 = 1-\bar\beta^{\min}$
+
+        \While{agent $t$ arrives}
+        \State Obtain the agent's value $v_t$ and class $j_t$
+
+        \If{$z_{j_t}^{t-1} = 0$}
+        \State $y_{j_t} = A_{j_t}$
+        \Else
+        \State $y_{j_t} = 0$
+        \EndIf
+
+        \State $x^G_t = \argmax_a \left\{ \frac{v_t+\beta^t_{j_t}-\bar\beta^t_{j_t}}{\lambda^{t-1}+\beta^t_{j_t}-\bar\beta^t_{j_t}+\bar\beta_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{B-M} u\right)du \right\}$
+
+        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t+\beta^t_{j_t}-\bar\beta^t_{j_t}}{\tilde\eta^{t-1}_{j_t}+\beta^t_{j_t}-\bar\beta^t_{j_t}} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_{j_t}} u\right)du \right\}$
+
+        \For{each $i \in [K]\setminus\{j_t\}$}
+        \State $x^i_t = \argmax_a \left\{ \frac{v_t+\beta^t_{j_t}-\bar\beta^t_{j_t}}{\tilde\eta^{t-1}_{i}+\beta^t_{j_t}-\bar\beta^t_{j_t}+\bar\beta_{j_t}+\beta_i} \cdot a - \int_0^{a} \exp\left(\frac{\alpha}{m_i} u\right)du \right\}$
+        \EndFor
+
+        \State $x_t = y_{j_t} + x^G_t + \sum_{j\in[K]} x^j_t$ \Comment{Total allocation}
+
+        \State Update $z_{j_t}^t = z_{j_t}^{t-1} + x_t$
+
+        \State Update:
+        \[
+            \lambda^t = \max\{\lambda^{t-1},\, v_t-\bar\beta_{j_t}\},\quad
+            \tilde\eta^t_{j_t} = \max\{\tilde\eta^{t-1}_{j_t},\, v_t\},\quad
+            \tilde\eta^t_{i} = \max\{\tilde\eta^{t-1}_{i},\, \lambda^t-\beta_{i}\}, \forall i \in [K]\setminus\{j_t\}
+        \]
+
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
+
+For the design of initial reservations and the competitive ratio, we again have the design parameters $ \{A_j\}_{\forall j\in[K]} $ and $ \alpha $ in Algorithm \ref{alg_LinearToLinear}. In the following theorem, we provide sufficient conditions on designing $ \{A_j\}_{\forall j\in[K]} $ and $ \alpha $ such that Algorithm \ref{alg_LinearToLinear} achieves the competitive ratio of $ \alpha $.
+
+
+
+    {\color{gray}
+
+        \begin{theorem}\label{theorem-linear2linear-soft-gfq-upper-bound}
+            For any $\alpha \geq \alpha^*$, Algorithm \ref{alg_LinearToLinear} is $\alpha$-competitive and produces a feasible solution, where $\alpha^*$ is the optimal value of the following optimization problem:
+            \begin{align*}
+                \min_{\{A_j\}_{\forall j \in[K]}} & \alpha                                                                                                                                                                                                                                                                                                                                                     \\
+                ext{s.t. }                        & \sum_{j\in[K]}A_j \geq \frac{1}{\alpha}\Bigl(B-(B-M)\bar\beta^{\min}\Bigr)                                                                                                                                                                                                                                                                                 \\
+                                                  & \begin{cases}
+                                                        A_{j} + \frac{B-M+m_{j}}{\alpha}\ln\left(\frac{v^*_{j,j}+\beta_{j}}{1+\beta_{j}}\right)=m_{j}                                   \\
+                                                        A_{i} + \frac{m_{i}}{\alpha}\ln\left(\frac{v^*_{i,j}+\beta_{i}}{1+\beta_{i}}\right)=m_{i}, \quad \forall i \in[K]\setminus\{j\} \\
+                                                        M+\frac{B-M+m_{j}}{\alpha}\ln\left(\frac{\theta-\bar\beta_j}{v^*_{j,j}-\bar\beta_j}\right)+\sum_{i \in[K]\setminus\{j\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta-\bar\beta_i}{v^*_{i,j}-\bar\beta_i}\right) \leq B
+                                                    \end{cases} \\
+                                                  & \hspace{5.5cm} ,\forall j \in [K].
+            \end{align*}
+        \end{theorem}
+    }
+
+
+
 
 \subsection{Necessary Conditions}
 

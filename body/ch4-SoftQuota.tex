@@ -103,6 +103,32 @@ In this case, we impose an additional assumption on the penalty parameters to en
 
 Without loss of generality, we assume $ \bar \beta_1 \leq \bar \beta_2 \leq \ldots \leq \bar \beta_K $.
 
+\paragraph{Linear-to-linear Penalties.} Finally, we consider the combination of the previous two cases, where the penalty function $ f_j $ for each group $ j $ is linearly decreasing before its desired allocation amount $ m_j $ and linearly increasing afterwards. Namely, we have:
+\begin{align*}
+    f_j(x) = \begin{cases}
+                 f_j^L(x) = -\beta_j x + \beta_j m_j, x\in [0, m_j], \\
+                 f_j^R(x) = \bar {\beta}_jx - \bar{\beta}_j m_j, x\in [m_j, \infty),
+             \end{cases}
+\end{align*}
+The offline optimization problem can then be expressed as follows:
+\begin{subequations}\label{equation-linear2linear-soft-quota-primal}
+    \begin{align}
+        \max_{0 \leq x_t \leq r_t}\quad
+         & \sum_{t \in [T]} v_tx_t -
+        \sum_{j \in [K]}
+        \left\{
+        \beta_j
+        \Bigl[\,m_j - \sum_{t=1}^{T} x_t \cdot\mathbf 1_{\{j_t = j\}}\Bigr]^{+} +
+        \bar{\beta}_j
+        \Bigl[\sum_{t=1}^{T} x_t \cdot\mathbf 1_{\{j_t = j\}} - m_j\Bigr]^{+}
+        \right\}                     \\[6pt]
+        \text{s.t.}\quad
+         & \sum_{t=1}^{T} x_t \leq B
+    \end{align}
+\end{subequations}
+
+This case combines the interpretations of both previous cases, where we provide a subsidy of $ \beta_j $ for the first $ m_j $ units of allocation to group $ j $, and impose a cost of $ \bar{\beta}_j $ for exceeding the desired allocation amount $ m_j $ for each group $ j $. And we impose the same assumption on the penalty parameters as in Assumption \ref{assumption-zero2linear-high-value}.
+
 
 \section{Main Results}\label{section-main-results-soft-quota}
 \input{body/ch4-mainResults.tex}
