@@ -8,6 +8,7 @@ The proof of the sufficient conditions in section \ref{section-main-results-soft
 
 \emph{Primal feasibility} is the final step, where we need to show that the allocation decisions produced by the algorithm are feasible, i.e., the total allocation does not exceed the capacity $ B $. This is the most involved part of the proof, where we use induction on time $ t $ and the idea of \emph{future feasibility}. We define a max-potential allocation function that captures the total allocation up to time $ t $ plus the maximum potential future allocation allowed by the current state of the dual variables. By showing that this max-potential allocation function remains within the capacity $ B $ for all time steps, we can conclude that the total allocation is feasible.
 
+\subsubsection{Full Proof for Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound}}
 
 As an example, we provide the full proof for Theorem \ref{theorem-linear2zero-soft-gfq-upper-bound} below.
 \begin{proof}
@@ -272,6 +273,122 @@ As an example, we provide the full proof for Theorem \ref{theorem-linear2zero-so
 
 
 \end{proof}
+
+\subsubsection{Proof Sketch of Theorem \ref{theorem-zero2linear-soft-gfq-upper-bound}}
+
+\paragraph{Dual Feasibility.}
+Recall the dual for the reformulation \eqref{equation-zero2linear-soft-quota-alternative-primal}:
+\begin{subequations}
+    \begin{align}
+        \min~        & (B-M)\cdot\bar{\lambda} + \sum_{j\in[K]}m_j \cdot \bar{\eta}_j                            \\
+        \text{s.t. } & \bar{\eta}_{j_t} \geq v_t, \quad \forall t\in [T]                                         \\
+                     & \bar{\lambda} + \bar{\beta}_j \geq \bar{\eta}_j \geq \bar{\lambda}, \quad \forall j\in[K]
+    \end{align}
+\end{subequations}
+Based on Algorithm \ref{alg_ZeroToLinear}, $\bar\eta_j^t$ and $\bar\lambda^t$ are non-decreasing in $t$ and satisfy:
+\begin{itemize}
+    \item $\bar\eta_{j_t}^t = \max\{\bar\eta_{j_t}^{t-1}, v_t\} \ge v_t$.
+    \item $\bar\eta_i^t = \max\{\bar\eta_i^{t-1}, \bar\lambda^t\} \ge \bar\lambda^t$ for all $i$.
+    \item If $ i \neq j_t $ and $ \bar\eta_i^t $ updates, then we have $ \bar\eta_i^t = \bar\lambda^t \leq \bar\lambda^t + \bar\beta_i $. If it does not update, then $ \bar\eta_i^t = \bar\eta_i^{t-1} \leq \bar\lambda^{t-1} + \bar\beta_i \leq \bar\lambda^t + \bar\beta_i $.
+    \item For $ j_t $, if $ \bar\eta_{j_t}^t = v_t $ and $ \bar\lambda^t = v_t - \bar\beta_{j_t} $ (when $ \bar\lambda $ updates), then $ \bar\eta_{j_t}^t = v_t \leq \bar\lambda^t + \bar\beta_{j_t} $. Otherwise $ \bar\lambda $ does not increase and the previous inequality persists.
+\end{itemize}
+Therefore the dual variables remain feasible at each time $ t $.
+
+\paragraph{Incremental Inequality.}
+Let $\Delta P_t := P_t-P_{t-1}$ and $\Delta D_t := D_t-D_{t-1}$, and define $ \bar\beta^t_j := \bar\beta_j\cdot \mathbf{1}_{\{z_j^{t-1}>m_j\}} $ and $ \tilde{v}_t := v_t-\bar\beta^t_{j_t} $ to be the penalty at time $ t $ and the penalty-adjusted value respectively.
+
+Then we have $ \Delta P_t = \tilde v_t\,x_t $, and $ \Delta D_t = (B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + \sum_{j\in[K]} m_j(\bar\eta_j^t-\bar\eta_j^{t-1}) $. We need to show that $ \Delta P_t \geq \Delta D_t/\alpha $ . Note that we will use the following key inequality in the analysis:  $e^{y}y\ge e^{y}-1$ for all $y\ge 0$.
+
+\paragraph{Case 1.} If $ v_t < \bar \eta_{j_t}^{t-1} $ and $ v_t - \bar \beta_{j_t} < \bar{\lambda}_{t-1} $, then there are no updates to the duals, leading to $ \Delta D_t = 0 $. Moreoever, we have $ x_t = 0 $ from Algorithm \ref{alg_ZeroToLinear}, hence $ \Delta P_t = 0 $, and the incremental inequality holds.
+
+\paragraph{Case 2.} If only $\bar\eta_{j_t}$ updates, i.e., $ v_t \ge \bar\eta_{j_t}^{t-1} $ but $ v_t-\bar\beta_{j_t} < \bar\lambda^{t-1} $, then $\bar\lambda^t=\bar\lambda^{t-1}$ and $\bar\eta_{j_t}^t=v_t$, while all other $\bar\eta_i$ remain unchanged. We have $ \Delta D_t = m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}) $.
+
+By first-order condition of Algorithm \ref{alg_ZeroToLinear}, if $ x^{j_t}_t>0 $, we have
+\[
+    \exp\Bigl(\tfrac{\alpha}{m_{j_t}}x^{j_t}_t\Bigr) = \frac{\tilde v_t}{\bar\eta^{t-1}_{j_t}-\bar\beta^t_{j_t}}.
+\]
+Using $\bar\eta_{j_t}^t=v_t$ and $\tilde v_t=v_t-\bar\beta^t_{j_t}$, we can rewrite
+\[    \bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}
+    = (\bar\eta_{j_t}^{t-1}-\bar\beta^t_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{m_{j_t}}x^{j_t}_t\Bigr)-1\Bigr),
+\]
+leading to $ \Delta D_t = m_{j_t}(\bar\eta_{j_t}^{t-1}-\bar\beta^t_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{m_{j_t}}x^{j_t}_t\Bigr)-1\Bigr) $. Given the primal increment $ \Delta P_t = \tilde v_t\,x^{j_t}_t = (\bar\eta_{j_t}^{t-1}-\bar\beta^t_{j_t})\exp\Bigl(\tfrac{\alpha}{m_{j_t}}x^{j_t}_t\Bigr)\,x^{j_t}_t $, we can conclude the incremental inequality as follows:
+Defining $ y:=\tfrac{\alpha}{m_{j_t}}x^{j_t}_t\ge 0 $, we have $ x^{j_t}_t=(m_{j_t}/\alpha)y $, and the key inequality implies
+\[    \Delta P_t
+    = (\bar\eta_{j_t}^{t-1}-\bar\beta^t_{j_t})e^{y}\cdot\frac{m_{j_t}}{\alpha}y
+    \ge \frac{m_{j_t}}{\alpha}(\bar\eta_{j_t}^{t-1}-\bar\beta^t_{j_t})(e^{y}-1)
+    = \frac{1}{\alpha}\Delta D_t.
+\]
+
+\paragraph{Case 3.} If $ \bar\lambda$ updates, but no other $\bar\eta_i$ is raised, i.e., $ v_t-\bar\beta_{j_t} \ge \bar\lambda^{t-1} $ but $ v_t < \bar\eta_i^{t-1} $ for all $ i\ne j_t $, then $\bar\lambda^t=v_t-\bar\beta_{j_t}$ and all $\bar\eta_i$ remain unchanged. We have $ \Delta D_t = (B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}) $. We will analyze the two components separately.
+
+Given the first-order condition of Algorithm \ref{alg_ZeroToLinear}, if $ x^G_t>0 $, we have
+\[
+    \exp\Bigl(\tfrac{\alpha}{B-M}x^G_t\Bigr) = \frac{\tilde v_t}{\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t}}.
+\]
+Given that $\bar\lambda^t=v_t-\bar\beta_{j_t}$ and $\tilde v_t=v_t-\bar\beta^t_{j_t}$, we can rewrite
+\begin{align*}
+    \bar\lambda^t-\bar\lambda^{t-1}
+     & = (v_t-\bar\beta_{j_t})-\bar\lambda^{t-1}
+    = (v_t-\bar\beta^t_{j_t})-(\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})                                   \\
+     & = (\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{B-M}x^G_t\Bigr)-1\Bigr).
+\end{align*}
+Leading to
+\[
+    (B-M)(\bar\lambda^t-\bar\lambda^{t-1})
+    =(B-M)(\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{B-M}x^G_t\Bigr)-1\Bigr).
+\]
+The primal gain from $ x^G_t $ is
+\begin{align*}
+    \Delta P_t^G
+     & = \tilde v_t\,x^G_t
+    = (\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\exp\Bigl(\tfrac{\alpha}{B-M}x^G_t\Bigr)\,x^G_t.
+\end{align*}
+Let $ y:=\tfrac{\alpha}{B-M}x^G_t\ge 0 $. Then $ x^G_t=((B-M)/\alpha)y $, and the key inequality gives
+\begin{align*}
+    \Delta P_t^G
+     & \ge \frac{B-M}{\alpha}(\bar\lambda^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{B-M}x^G_t\Bigr)-1\Bigr) \\
+     & = \frac{1}{\alpha}(B-M)(\bar\lambda^t-\bar\lambda^{t-1}).
+\end{align*}
+For the class-specific component, if $ v_t < \bar\eta_{j_t}^{t-1} $, then $ x^{j_t}_t=0 $ and $\bar\eta_{j_t}$ does not contribute to $\Delta D_t$. Otherwise, if $ v_t \ge \bar\eta_{j_t}^{t-1} $, then $\bar\eta_{j_t}$ updates and the same argument as Case 2 shows
+\[\Delta P_t^{j_t}\ge \frac{1}{\alpha}m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}).\]
+Combining the active components yields
+\begin{align*}
+    \Delta P_t \ge \frac{1}{\alpha}\Bigl((B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1})\Bigr)=\frac{1}{\alpha}\Delta D_t.
+\end{align*}
+
+\paragraph{Case 4.} If $\bar\lambda$ updates and there are other $\bar\eta_i$ raised to the new $\bar\lambda^t$, i.e., $ v_t-\bar\beta_{j_t} \ge \bar\lambda^{t-1} $ and there exists a nonempty set $ I_t\subseteq[K]\setminus\{j_t\} $ such that $ \bar\eta_i^{t}=\bar\lambda^{t}>\bar\eta_i^{t-1} $ for all $ i\in I_t $, then we have
+\[
+    \Delta D_t=(B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}) + \sum_{i\in I_t} m_i(\bar\eta_i^t-\bar\eta_i^{t-1}).
+\]
+We will focus on the additional terms from $ i\in I_t $. The class-specific and global components are handled as in previous cases. The algorithm is updating other $ \bar \eta_i $ to the common level $ \bar \lambda^t$. When $ \bar \beta^t_{j_t} = \bar \beta_{j_t} $, we have $ \tilde v_t = v_t - \bar \beta_{j_t} = \bar \lambda^t $. The first-order condition (when $ x^i_t > 0 $) gives
+\[
+    \exp\Bigl(\tfrac{\alpha}{m_i}x^i_t\Bigr) = \frac{\tilde v_t}{\bar\eta_i^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t}}.
+\]
+Using $ \bar \eta_i^t = \bar \lambda^t $, we obtain
+\begin{align*}
+    \bar\eta_i^t-\bar\eta_i^{t-1}
+     & = (\bar\eta_i^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{m_i}x^i_t\Bigr)-1\Bigr),
+\end{align*}
+For each $ i\in I_t $, the primal increment is
+\begin{align*}
+    \Delta P_t^{i}
+     & = \tilde v_t\,x^i_t
+    = (\bar\eta_i^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\exp\Bigl(\tfrac{\alpha}{m_i}x^i_t\Bigr)\,x^i_t.
+\end{align*}
+Let $ y:=\tfrac{\alpha}{m_i}x^i_t\ge 0 $. Then $ x^i_t=(m_i/\alpha)y $, and the key inequality gives
+\begin{align*}
+    \Delta P_t^{i}
+     & \ge \frac{m_i}{\alpha}(\bar\eta_i^{t-1}-\bar\beta^t_{j_t}+\bar\beta_{j_t})\Bigl(\exp\Bigl(\tfrac{\alpha}{m_i}x^i_t\Bigr)-1\Bigr) \\
+     & = \frac{1}{\alpha}m_i(\bar\eta_i^t-\bar\eta_i^{t-1}).
+\end{align*}
+Together with the previous components, we have
+\begin{align*}
+    \Delta P_t \ge \frac{1}{\alpha}\Bigl((B-M)(\bar\lambda^t-\bar\lambda^{t-1}) + m_{j_t}(\bar\eta_{j_t}^t-\bar\eta_{j_t}^{t-1}) + \sum_{i\in I_t} m_i(\bar\eta_i^t-\bar\eta_i^{t-1})\Bigr)=\frac{1}{\alpha}\Delta D_t.
+\end{align*}
+
+\paragraph{Primal Feasibility.}
+
+
 
 \subsection{Proof Outline for Necessary Conditions}
 

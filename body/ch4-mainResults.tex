@@ -128,7 +128,7 @@ where $ v^{\max}_{\bar {\beta}} = \max_{j\in[K]} \{v^{\max}_j - \bar{\beta}_j\} 
     \begin{algorithmic}[1]
 
         \Require $B, \theta$; $\{m_j, \bar{\beta}_j, \bar{A}_j\}_{j\in[K]}$ and $\alpha$
-        \State Initialize $\eta_j^0 = 1$, $z_j^0 = 0$ for all $j \in [K]$, and $\lambda^0 = 1 - \bar{\beta}^{\min}$
+        \State Initialize $\bar\eta_j^0 = 1$, $z_j^0 = 0$ for all $j \in [K]$, and $\bar\lambda^0 = 1 - \bar{\beta}^{\min}$
 
         \While{agent $t$ arrives}
         \State Obtain the agent's value $ v_t $ and class $j_t$
@@ -139,12 +139,12 @@ where $ v^{\max}_{\bar {\beta}} = \max_{j\in[K]} \{v^{\max}_j - \bar{\beta}_j\} 
         \State $y_{j_t} = 0$
         \EndIf
 
-        \State $x^G_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\lambda^{t-1}-\bar\beta^t_{j_t} + \bar\beta_{j_t}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{m_{j_t}}\cdot u)du\right\}$
+        \State $x^G_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\bar\lambda^{t-1}-\bar\beta^t_{j_t} + \bar\beta_{j_t}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{B- M}\cdot u)du\right\}$
 
-        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\bar\eta^{t-1}_{j_t}-\bar\beta^t_{j_t}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{B- M}\cdot u)du \right\}$
+        \State $x^{j_t}_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\bar\eta^{t-1}_{j_t}-\bar\beta^t_{j_t}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{m_{j_t}}\cdot u)du \right\}$
 
         \For{each $i \in [K]\setminus\{j_t\}$}
-        \State $x^i_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\bar\eta^{t-1}_{j_t}-\bar\beta^t_{j_t} + \bar\beta_{i}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{ m_{i}}\cdot u)du \right\}$
+        \State $x^i_t = \argmax_a \left\{ \frac{v_t-\bar\beta^t_{j_t}}{\bar\eta^{t-1}_{i}-\bar\beta^t_{j_t} + \bar\beta_{j_t}} \cdot a - \int_0^{a} \exp(\frac{\alpha}{ m_{i}}\cdot u)du \right\}$
         \EndFor
 
         \State $x_t = y_{j_t} + x^G_t + \sum_{j\in[K]} x^j_t$ \Comment{Total allocation}
@@ -153,9 +153,9 @@ where $ v^{\max}_{\bar {\beta}} = \max_{j\in[K]} \{v^{\max}_j - \bar{\beta}_j\} 
 
         \State Update:
         \[
-            \eta^t_{j_t} = \max\{\eta^{t-1}_{j_t}, v_t\}, \quad
-            \lambda^t = \max\{\lambda^{t-1}, v_t-\beta_{j_t}\}, \quad
-            \eta^t_{i} = \max\{\eta^{t-1}_{i}, \lambda^t\},\forall i \in [K]/\{j_t\}
+            \bar\eta^t_{j_t} = \max\{\bar\eta^{t-1}_{j_t}, v_t\}, \quad
+            \bar\lambda^t = \max\{\bar\lambda^{t-1}, v_t-\bar\beta_{j_t}\}, \quad
+            \bar\eta^t_{i} = \max\{\bar\eta^{t-1}_{i}, \bar\lambda^t\},\forall i \in [K]\setminus\{j_t\}
         \]
 
         \EndWhile
@@ -163,26 +163,26 @@ where $ v^{\max}_{\bar {\beta}} = \max_{j\in[K]} \{v^{\max}_j - \bar{\beta}_j\} 
     \end{algorithmic}
 \end{algorithm}
 
-In Algorithm \ref{alg_ZeroToLinear}, $ \bar{\beta}^{\min} = \min_{j\in[K]} \bar{\beta}_j $, and $ \bar{\beta}_j^t = \bar{\beta}_j \cdot \mathbf{1}_{\{z_j^{t-1} > m_j\}} $ indicates whether the penalty for class $ j $ is active at time $ t $. To see how dual variable updates can help represent the offline optimal behavior, we observe that $ \eta_{j_t} $ is updated when the agent's value $ v_t $ exceeds the current class-specific dual variable $ \eta^{t-1}_{j_t} $, and $ \lambda $, which guides the global allocation, is updated when the penalty adjusted value $ v_t - \bar \beta_{j_t} $ exceeds the current global dual variable $ \lambda^{t-1} $. Finally, $\eta_i $ for all other classes $ i \neq j_t $, is updated only if $ \lambda^t $ exceeds the current class-specific dual variable $ \eta^{t-1}_i $.
+In Algorithm \ref{alg_ZeroToLinear}, $ \bar{\beta}^{\min} = \min_{j\in[K]} \bar{\beta}_j $, and $ \bar{\beta}_j^t = \bar{\beta}_j \cdot \mathbf{1}_{\{z_j^{t-1} > m_j\}} $ indicates whether the penalty for class $ j $ is active at time $ t $. To see how dual variable updates can help represent the offline optimal behavior, we observe that $ \bar\eta_{j_t} $ is updated when the agent's value $ v_t $ exceeds the current class-specific dual variable $ \bar\eta^{t-1}_{j_t} $, and $ \bar\lambda $, which guides the global allocation, is updated when the penalty-adjusted value $ v_t - \bar \beta_{j_t} $ exceeds the current global dual variable $ \bar\lambda^{t-1} $. Finally, $\bar\eta_i $ for all other classes $ i \neq j_t $, is updated only if $ \bar\lambda^t $ exceeds the current class-specific dual variable $ \bar\eta^{t-1}_i $.
 
 
 Once again, we have design parameters $ \{\bar{A}_j\}_{\forall j\in [K]} $ and $ \alpha $ in Algorithm \ref{alg_ZeroToLinear}. In the following theorem, we provide sufficient conditions on designing $ \{\bar{A}_j\}_{\forall j\in [K]} $ and $ \alpha $ such that Algorithm \ref{alg_ZeroToLinear} achieves the competitive ratio of $ \alpha $.
 
 
 \begin{theorem}\label{theorem-zero2linear-soft-gfq-upper-bound}
-    For any $ \alpha \geq {\alpha}^* $, Algorithm \ref{alg_ZeroToLinear} is $ \alpha $-competitive and produces a feasible solution, where $ {\alpha}^* $ is the optimal value of the following optimization problem:
+    For any $ \alpha \geq \alpha^* $, Algorithm \ref{alg_ZeroToLinear} is $ \alpha $-competitive and produces a feasible solution, where $ \alpha^* $ is the optimal value of the following optimization problem:
     \begin{align*}
-         & \min_{\{\bar A_j\}_{\forall j \in[K]}}  \alpha                                                                                                                                                                                                                                                                                                                                                                                                                                           \\
-         & \text{s.t. } \sum_{j\in[K]}\bar A_j \geq \frac{1}{\alpha}(B - (B-\bar M)\bar\beta^{\min})                                                                                                                                                                                                                                                                                                                                                                                                \\
-         & \qquad\begin{cases}\bar A_1 + \frac{B-\bar M+m_{1}}{\alpha}\ln\left(v^*_{1,1}\right)=m_{1}                                  \\
-                     \bar A_{i} + \frac{\bar m_{i}}{\alpha}\ln\left(v^*_{i,1}\right)=\bar m_{i}, \quad \forall i \in[K]/\{1\} \\
-                     \bar M+\frac{B-\bar M+m_{1}}{\alpha}\ln\left(\frac{\theta-\bar\beta_1}{v^*_{1,1}-\bar\beta_1}\right)+\sum_{i \in[K]/\{1\}}\frac{\bar m_{i}}{\alpha}\ln\left(\frac{\theta-\bar\beta_i}{v^*_{i,j}-\bar\beta_i}\right) \leq B
-                 \end{cases}                                                                                                                  \\
-         & \qquad\begin{cases}\bar A_{j} + \frac{\bar m_{j}}{\alpha}\ln\left(v^*_{j,j}\right) + \frac{B-\bar M}{\alpha}\ln\left(\frac{v^*_{j,j}}{1-\bar\beta_1+\bar\beta_j}\right)=\bar m_{j}                                                          \\
-                     \bar A_{i} + \frac{\bar m_{i}}{\alpha}\ln\left(v^*_{i,j}\right)=\bar m_{i}, \quad \forall i \in[K]/\{j\}                                                                                                                 \\
-                     \bar M+\frac{B-\bar M+\bar m_{j}}{\alpha}\ln\left(\frac{\theta-\bar\beta_j}{v^*_{j,j}-\bar\beta_j}\right)+\sum_{i \in[K]/\{j\}}\frac{\bar m_{i}}{\alpha}\ln\left(\frac{\theta-\bar\beta_i}{v^*_{i,j}-\bar\beta_i}\right) \\ \hspace{3.4cm} + \frac{B-\bar M}{\alpha}\ln\left(\frac{\theta - \bar\beta_1}{\theta-2\bar\beta_1+\bar\beta_j}\right)\leq B
+         & \min_{\{\bar A_j\}_{\forall j \in[K]}}  \alpha                                                                                                                                                                                                                                                                                                                                                                                                                                     \\
+         & \text{s.t. } \sum_{j\in[K]}\bar A_j \geq \frac{1}{\alpha}(B - (B-M)\bar\beta^{\min})                                                                                                                                                                                                                                                                                                                                                                                               \\
+         & \qquad\begin{cases}\bar A_1 + \frac{B-M+m_{1}}{\alpha}\ln\left(v^*_{1,1}\right)=m_{1}                                     \\
+                     \bar A_{i} + \frac{m_{i}}{\alpha}\ln\left(v^*_{i,1}\right)=m_{i}, \quad \forall i \in[K]\setminus\{1\} \\
+                     M+\frac{B-M+m_{1}}{\alpha}\ln\left(\frac{\theta-\bar\beta_1}{v^*_{1,1}-\bar\beta_1}\right)+\sum_{i \in[K]\setminus\{1\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta-\bar\beta_i}{v^*_{i,1}-\bar\beta_i}\right) \leq B
+                 \end{cases}                                                                                                                   \\
+         & \qquad\begin{cases}\bar A_{j} + \frac{m_{j}}{\alpha}\ln\left(v^*_{j,j}\right) + \frac{B-M}{\alpha}\ln\left(\frac{v^*_{j,j}}{1-\bar\beta_1+\bar\beta_j}\right)=m_{j}                                                             \\
+                     \bar A_{i} + \frac{m_{i}}{\alpha}\ln\left(v^*_{i,j}\right)=m_{i}, \quad \forall i \in[K]\setminus\{j\}                                                                                                       \\
+                     M+\frac{B-M+m_{j}}{\alpha}\ln\left(\frac{\theta-\bar\beta_j}{v^*_{j,j}-\bar\beta_j}\right)+\sum_{i \in[K]\setminus\{j\}}\frac{m_{i}}{\alpha}\ln\left(\frac{\theta-\bar\beta_i}{v^*_{i,j}-\bar\beta_i}\right) \\ \hspace{3.4cm} + \frac{B-M}{\alpha}\ln\left(\frac{\theta - \bar\beta_1}{\theta-2\bar\beta_1+\bar\beta_j}\right)\leq B
                  \end{cases} \\
-         & \hspace{5.5cm} ,\forall j \in [K]/\{1\}
+         & \hspace{5.5cm} ,\forall j \in [K]\setminus\{1\}
     \end{align*}
 \end{theorem}
 
