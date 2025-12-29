@@ -136,7 +136,28 @@ which gives the optimal profit attainable when the highest per-unit value in the
 
 \section{Sufficient Conditions}
 
- {\color{red}Posted price mechanism to go here.}
+We begin by presenting a posted price mechanism that first satisfies the quota requirements for each group and then allocates the remaining resources based on a dynamically adjusted posted price threshold. The detailed procedure is outlined in Algorithm \ref{alg_cost_quota_posted_price}.
+
+\begin{algorithm}
+    \caption{Posted Price Mechanism with Quota Constraints}
+    \label{alg_cost_quota_posted_price}
+    \begin{algorithmic}[1]
+        \Require Budget $B$, quotas $\{m_j\}_{j\in[K]}$, pricing function $\phi(\cdot)$
+        \State Initialize $u^0 \gets 0$ and $u_j^0 \gets 0$ for all $j\in[K]$
+        \While{agent $t$ arrives}
+        \State $y_t \gets 0$, $x_t \gets 0$
+        \If{$u_{j_t}^{t-1} < m_{j_t}$} \Comment{Satisfy quota for class $j_t$ first}
+        \State $y_t \gets \min\{r_t,\, m_{j_t}-u_{j_t}^{t-1}\}$
+        \State Update $u_{j_t}^{t} \gets u_{j_t}^{t-1}+y_t$
+        \EndIf
+        \If{$v_t \ge \phi(u^{t-1})$} \Comment{Allocate remaining resource by posted-price threshold}
+        \State $x_t \gets \min\left\{\arg\max_{a\in[0,\,r_t-y_t]}\left( a\,v_t - \int_{u^{t-1}}^{u^{t-1}+a}\phi(\eta)\,d\eta \right),\, B-M-u^{t-1}\right\}$
+        \EndIf
+        \State Update the cumulative non-quota allocation: $u^{t} \gets u^{t-1}+x_t$
+        \State Update the allocation of agent $t$: $x_t \gets x_t + y_t$
+        \EndWhile
+    \end{algorithmic}
+\end{algorithm}
 
 
 The key to the posted price mechanism is to design a pricing function $ \phi(u) $ that dynamically adjusts the unit price based on the cumulative allocation $ u $ made so far.

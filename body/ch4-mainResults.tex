@@ -30,7 +30,7 @@ Based on the online primal dual framework, now we present an algorithm that upda
 where $ v^{\max}_j $ is the maximum value among all arrivals from group $ j $, and $ v^{\max} = \max_{j\in[K]} v^{\max}_j $.
 Intuitively,we need to select $ \lambda $ in a way that it updates according to $ v^{\max} $, and  $\eta_{j_t} $ according to $ \max \{v^{\max}_{j_t}, v^{\max}-\beta_{j_t}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Linear-To-Zero in Algorithm \ref{alg_LinearToZero}.
 \begin{algorithm}
-    \caption{Linear-To-Zero}
+    \caption{Set-Aside Multi-Threshold Algorithm for Linear-to-Zero Penalties}
     \label{alg_LinearToZero}
     \begin{algorithmic}[1]
 
@@ -123,7 +123,7 @@ The algorithm Zero-To-Linear is similar to Algorithm \ref{alg_LinearToZero}, wit
 where $ v^{\max}_{\bar {\beta}} = \max_{j\in[K]} \{v^{\max}_j - \bar{\beta}_j\} $ represents the maximum value adjusted by the penalty across all groups, and $ v^{\max}_j $ is the maximum value among all arrivals from group $ j $. As a result, it is intuitive to set the dual variables as $ \bar{\lambda} $ according to $ v^{\max}_{\bar{\beta}} $ and $ \bar{\eta}_{j_t} $ according to $ \max\{ v^{\max}_{j_t}, v^{\max}_{\bar{\beta}}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Zero-To-Linear in Algorithm \ref{alg_ZeroToLinear}.
 
 \begin{algorithm}
-    \caption{Zero-To-Linear}
+    \caption{Set-Aside Multi-Threshold Algorithm for Zero-to-Linear Penalties}
     \label{alg_ZeroToLinear}
     \begin{algorithmic}[1]
 
@@ -216,7 +216,7 @@ Given the dual formulation, we can again characterize the offline optimum in ter
 We will similarly design an online algorithm that updates the dual variables at each time step to track the behavior of the offline optimum. We will set $ \lambda $ according to $ v^{\max}_{\bar\beta} $ and $ \tilde\eta_{j_t} $ according to $ \max\{v^{\max}_{j_t},\, v^{\max}_{\bar\beta}-\beta_{j_t}\} $ at each time step $ t $. Based on this intuition, we present the algorithm Linear-To-Linear in Algorithm \ref{alg_LinearToLinear}. Again, we use  $\bar\beta^{\min}=\min_{j\in[K]}\bar\beta_j$ in the initialization of $\lambda^0$, and $\beta^t_{j_t} = \beta_{j_t}\cdot \mathbf{1}_{\{z_{j_t}^{t-1} < m_{j_t}\}}$ and $\bar\beta^t_{j_t} = \bar\beta_{j_t}\cdot \mathbf{1}_{\{z_{j_t}^{t-1} > m_{j_t}\}}$ to indicate whether the subsidy or penalty for class $ j_t $ is active at time $ t $.
 
 \begin{algorithm}
-    \caption{Linear-To-Linear}
+    \caption{Set-Aside Multi-Threshold Algorithm for Linear-to-Linear Penalties}
     \label{alg_LinearToLinear}
     \begin{algorithmic}[1]
         \Require $B, \theta$; $\{m_j, \beta_j, \bar\beta_j, A_j\}_{j\in[K]}$ and $\alpha$
