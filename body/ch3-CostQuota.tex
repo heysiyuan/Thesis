@@ -1,6 +1,6 @@
 \section{Problem Statement}
 
-We consider a seller with a total resource budget $B$ and a strictly convex production cost function $f:[0,B]\to\mathbb{R}_{+}$. The seller offers the divisible resource to a sequence of buyers indexed by $t\in\{1,\dots,T\}$, with the total number of buyers $T$ unknown. Each buyer $t$ is characterized by a per-unit value $v_t$ and an allocation rate limit $r_t$, their group identity $ j_t \in [K]$ and arrives sequentially over time.
+We consider a seller with a total resource budget $B$ and a strictly convex packing cost function $f:[0,B]\to\mathbb{R}_{+}$. The seller offers the divisible resource to a sequence of buyers indexed by $t\in\{1,\dots,T\}$, with the total number of buyers $T$ unknown. Each buyer $t$ is characterized by a per-unit value $v_t$ and an allocation rate limit $r_t$, their group identity $ j_t \in [K]$ and arrives sequentially over time.
 
 When buyer $t$ arrives, the seller must irrevocably choose an allocation decision $x_t\in[0,r_t]$ without any information about future buyers. Let $\{x_t\}_{t=1}^T$ denote the resulting allocation, which must satisfy two key constraints.
 
@@ -14,7 +14,7 @@ Second, there is an allocation quota $m_j \geq 0 $ that must be met for each gro
 \]
 We define $ M = \sum_{j\in[K]} m_j $ as the total allocation quota across all groups.
 
-Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the total value derived from the buyers minus the production cost incurred by the seller:
+Given an allocation $\{x_t\}_{t=1}^T$, the social welfare is defined as the total value derived from the buyers minus the packing cost incurred by the seller:
 \[
     \sum_{t\in[T]} v_t x_t - f\left(\sum_{t\in[T]} x_t\right).
 \]
@@ -47,7 +47,7 @@ Formally, a problem setting can be defined by the following two components:
           \begin{itemize}
               \item $B > 0$ is the total resource budget,
               \item $M \in (0,B]$ is the allocation quota,
-              \item $f : [0,B] \to \mathbb{R}_{+}$ is the production cost function,
+              \item $f : [0,B] \to \mathbb{R}_{+}$ is the packing cost function,
               \item $ K $ is the number of buyer groups,
               \item $\{\theta_j\}_{j=1}^K$ are the upper bounds on buyers' per-unit valuations for each group (Assumption~\ref{assumption-bounded-value}).
           \end{itemize}
@@ -79,7 +79,7 @@ We first define the \emph{marginal cost} as $f'(y)$ for any $y \in [0,B]$. The m
 \[
     \underline{c} = f'(0), \qquad \overline{c} = f'(B).
 \]
-Based on the marginal cost, we define the \emph{production function}
+Based on the marginal cost, we define the \emph{packing function}
 \[
     B(v) =
     \begin{cases}
@@ -87,9 +87,9 @@ Based on the marginal cost, we define the \emph{production function}
         B,          & v\in [\overline{c}, \infty),
     \end{cases}
 \]
-which represents the maximum number of units that can be profitably produced at a marginal cost not exceeding $v$.
+which represents the maximum number of units that can be profitably packed at a marginal cost not exceeding $v$.
 
-From $ B(v) $, we can further define the \emph{minimum production level} $ \underline{B} $ and the \emph{maximum production level} $ \overline{B} $ as follows.
+From $ B(v) $, we can further define the \emph{minimum packing level} $ \underline{B} $ and the \emph{maximum packing level} $ \overline{B} $ as follows.
 \[
     \underline{B} =
     \begin{cases}
@@ -97,7 +97,7 @@ From $ B(v) $, we can further define the \emph{minimum production level} $ \unde
         B,          & \overline{c} \leq 1,
     \end{cases}
 \]
-denotes the maximum number of resources produced when all arrivals have value $1$. Conversely, the \emph{maximum production level}
+denotes the maximum number of resources packed when all arrivals have value $1$. Conversely, the \emph{maximum packing level}
 \[
     \overline{B} =
     \begin{cases}
@@ -105,8 +105,8 @@ denotes the maximum number of resources produced when all arrivals have value $1
         B,                 & \overline{c} \leq \theta_K,
     \end{cases}
 \]
-denotes the maximum number of resources produced when all arrivals have value $\theta_K$.
-Next, we extend the production cost function to the entire non-negative real line by defining
+denotes the maximum number of resources packed when all arrivals have value $\theta_K$.
+Next, we extend the packing cost function to the entire non-negative real line by defining
 \[
     \bar{f}(y) =
     \begin{cases}
@@ -127,7 +127,7 @@ represents the profit from selling $y$ units at price $v$. We then define the \e
     \end{cases}
 \]
 which gives the optimal profit attainable when the highest per-unit value in the arrival sequence is $v$. Here,
-\(C_j(v) = B(v) - \sum_{i=1}^{j-1} m_i\) is the remaining production capacity after satisfying the quota requirements of groups \(1\) through \(j-1\), and
+\(C_j(v) = B(v) - \sum_{i=1}^{j-1} m_i\) is the remaining packing capacity after satisfying the quota requirements of groups \(1\) through \(j-1\), and
 \(D_j = \sum_{i=1}^{j-1} m_i \theta_i\) is the maximum value from meeting those quota requirements.
 
 \begin{remark}
@@ -240,7 +240,7 @@ The key to the posted price mechanism is to design a pricing function $ \phi(u) 
 Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of exposition, and thus denoting an arrival instance as $ I = \{(v_1, j_1), (v_2, j_2), \cdots, (v_T, j_T) \} $, where $ (v_t, j_t) $ represents an arrival from class $ j_t $ with value $ v_t $.
 
 \begin{definition}
-    \textbf{Hard Instance Family for Quota with Production Costs.}
+    \textbf{Hard Instance Family for Quota with Packing Costs.}
     Consider the construction of the hard instance $ \mathcal{I}^{\mathrm{Q}} $, where there is a continuum of values increasing from $ 1 $ to $ \theta_K $, with each value repeated for every class as long as it remains feasible:
     \begin{align*}
         \mathcal{I}^{\mathrm{Q}}= \Biggl\{ & \underbrace{(1, 1), (1,2), \dots , (1, K)}_{K\textit{ agents}}, \underbrace{(1+\epsilon, 1), \dots, (1+\epsilon, K)}_{K\textit{ agents}}, \dots,                                                                                            \\
@@ -251,7 +251,7 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
 
 
 \begin{theorem}\label{theorem-quota-general-necessary-conditions}
-    \textbf{Necessary Conditions for Quota with Production Costs.}
+    \textbf{Necessary Conditions for Quota with Packing Costs.}
     If there exists an $ \alpha $-competitive online algorithm that also satisfies the quota requirement, then there must exist a parameter $ \omega $ that satisfies
     \begin{equation}\label{equation-quota-omega}
         \begin{aligned}
@@ -272,11 +272,11 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
 \end{theorem}
 \begin{proof}
     \textbf{Boundary conditions.}
-    The utilization of any online algorithm cannot exceed the maximum profitable production level, hence
+    The utilization of any online algorithm cannot exceed the maximum profitable packing level, hence
     \[
         \psi(\theta_K) \le \overline{B}.
     \]
-    Consider the instance $\mathcal{I}^{\mathrm{Q}}_1$, where all arrivals have value $1$. By Assumptions~\ref{assumption-quota-feasibility} and \ref{assumption-quota-profitability}, it is feasible and profitable to first satisfy all quotas $m_j$ and then keep allocating to value-$1$ buyers until the marginal cost reaches $1$, i.e., until total production reaches $\underline{B}$. Thus
+    Consider the instance $\mathcal{I}^{\mathrm{Q}}_1$, where all arrivals have value $1$. By Assumptions~\ref{assumption-quota-feasibility} and \ref{assumption-quota-profitability}, it is feasible and profitable to first satisfy all quotas $m_j$ and then keep allocating to value-$1$ buyers until the marginal cost reaches $1$, i.e., until total packing level reaches $\underline{B}$. Thus
     \[
         \OPT(\mathcal{I}^{\mathrm{Q}}_1) = h(1) = F_1(\underline{B}) = \underline{B} - f(\underline{B}).
     \]
@@ -295,7 +295,7 @@ Throughout the proofs, we assume $ r_t = B $ for all $ t\in [T] $ for ease of ex
         \psi : [1,\theta_K] \to [\omega,\overline{B}] \quad\text{is non-decreasing.}
     $
 
-    Fix $v \in [\theta_{j-1},\theta_j]$ for some $j\in[K]$ and consider the truncated hard instance $\mathcal{I}^{\mathrm{Q}}_v$. By construction, the maximum value in $\mathcal{I}^{\mathrm{Q}}_v$ is $v$, and the maximum profitable total production is therefore $B(v)$.
+    Fix $v \in [\theta_{j-1},\theta_j]$ for some $j\in[K]$ and consider the truncated hard instance $\mathcal{I}^{\mathrm{Q}}_v$. By construction, the maximum value in $\mathcal{I}^{\mathrm{Q}}_v$ is $v$, and the maximum profitable total packing level is therefore $B(v)$.
 
     In any quota satisfying offline solution for $\mathcal{I}^{\mathrm{Q}}_v$, at least $m_i$ units must be allocated to each group $i$. For group $i<j$ with highest value $\theta_i$ less than $v$, quota allocations yield at most $m_i\theta_i$; for groups $i\ge j$ with highest value at least $v$, they yield at most $m_iv$. The remaining $B(v)-M$ units, if any, yield at most $v$ per unit. Hence
     \[
