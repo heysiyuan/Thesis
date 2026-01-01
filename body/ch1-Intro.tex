@@ -1,4 +1,23 @@
 \section{Motivation}
+As online allocation problems become increasingly prevalent in various domains, maximizing social welfare against future uncertainty via the competitive analysis framework has been extensively studied in the literature. Meanwhile, there is a parallel line of research focusing on devising fair allocation mechanisms in the allocation process, where the focus is often to show the existence and construction of fair outcomes without considering the efficiency of the allocation. Naturally, there is a fundamental tension between maximizing allocation efficiency and ensuring fairness outcomes. As a result, works that jointly consider both efficiency and fairness and their trade-offs in online allocation problems have been few and far between \cite{caragiannis2019unreasonable, 10.1145/3695411.3695414, 10.1145/3726854.3727299}. However, in many real-world applications, although maximizing efficiency is still the primary objective, there are often hard quota requirements \cite{10.1145/3726854.3727299} or taxes and subsidies as incentives in place that drive for an desired level of fairness in the allocation outcomes \cite{peysakhovich2023implementing}.
+
+We take Online Fractional Knapsack (OFK) as our gateway to study the interplay between efficiency and fairness in online allocation problems. As a fundamental online resource allocation problem, Online Fractional Knapsack and its variants has been widely studied via the competitive analysis framework \cite{zhou2008budget,im2021online,yang2021competitive, sun2022online}. Meanwhile, some fairness notions such as time fairness \cite{lechowicz2023time} and fairness in terms of voters' preferences \cite{fluschnik2019fair}. However, to the best of our knowledge, there is no prior work on studying quota requirements and its tax-subsidy implementation in Online Fractional Knapsack problems.
+
 
 \section{Research Question and Contributions}
+
+In this thesis, we focus on quota requirements in Online Fractional Knapsack problems, first as hard constraints on the allocation outcome, and then implemented via taxes and subsidies as incentives in the allocation process. The hard quota constraints require the final allocation to each group of agents to reach a certain level, whereas the tax-subsidy implementation penalizes both under-allocation and over-allocation to each group of agents during the allocation process. Our main research questions are:
+\begin{itemize}
+    \item \textbf{OFK with Production Cost and Quota Constraints}: The integration of both production cost the binds the total allocation and quota constraints on each group of agents in Online Fractional Knapsack problems. How do these two aspects interplay with each other in terms of allocation efficiency?
+    \item \textbf{OFK with Soft Quota Constraints}: Instead of hard quota constraints, can we drive the outcome allocation towards a desired level of allocation for each group of agents via a set of surrogate cost functions that penalize both under-allocation and over-allocation during the allocation process?
+\end{itemize}
+
+To answer these questions, we make the following contributions:
+\begin{itemize}
+    \item \textbf{Tight Guarantees for OFK}: We provide matching upper and lower bounds on the competitive ratio for Online Fractional Knapsack with both production costs and hard quota constraints.
+    \item \textbf{Competitive Algorithms for OFK with Soft Quota Constraints}: We design competitive algorithms for Online Fractional Knapsack with soft quota constraints, implemented via (i) subsidies for under-allocation, (ii) taxes for over-allocation, and (iii) combined taxes and subsidies.
+    \item \textbf{Lower Bounds for OFK with Soft Quota Constraints}: We construct a family of hard instances that yields a lower bound on the competitive ratio for Online Fractional Knapsack with soft quota constraints implemented via combined taxes and subsidies.
+\end{itemize}
 \section{Thesis Structure}
+
+The rest of the thesis is organized as follows. In Chapter \ref{section-literature-review}, we review the related literature on online allocation problems, online allocation with costs, and fairness measures in online allocation problems. Chapter \ref{section-online-allocation-cost-quota} presents our results on Online Fractional Knapsack with both production costs and hard quota constraints. Chapter \ref{section-soft-quota} presents our results on Online Fractional Knapsack with soft quota constraints implemented via taxes and subsidies. Finally, we conclude the thesis in Chapter \ref{section-conclusion} with a summary of our contributions and directions for future research.
